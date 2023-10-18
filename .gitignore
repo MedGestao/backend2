@@ -1,0 +1,34 @@
+# Ignorar arquivos de compilação e saída
+*.exe
+*.out
+*.test
+*.prof
+/bin/
+/pkg/
+
+# Ignorar arquivos de configuração do editor
+.idea/
+.vscode/
+
+# Ignorar arquivos de cache
+.DS_Store
+Thumbs.db
+.cache/
+
+# Ignorar arquivos gerados
+*.log
+*.tmp
+*.swp
+*.swo
+
+# Ignorar arquivos de ambiente
+.env
+
+# Ignorar arquivos de configuração específicos do usuário
+.bash_history
+.bashrc
+.zshrc
+
+
+# diretório não é mais necessário:
+frontend
