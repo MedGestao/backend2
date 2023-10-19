@@ -35,15 +35,55 @@ func (d Doctor) GetUser() User {
 	return d.user
 }
 
-func (d Doctor) SetUser(person User) {
-	d.user = person
+//func (d Doctor) SetUser(person User) {
+//	d.user = person
+//}
+
+func (p *Doctor) SetUserId(newId int) {
+	p.user.SetId(newId)
+}
+
+func (p *Doctor) SetUserName(newName string) {
+	p.user.SetName(newName)
+}
+
+func (p *Doctor) SetUserBirthDate(newBirthDate time.Time) {
+	p.user.SetBirthDate(newBirthDate)
+}
+
+func (p *Doctor) SetUserCpf(newCpf string) {
+	p.user.SetCpf(newCpf)
+}
+
+func (p *Doctor) SetUserSex(newSex string) {
+	p.user.SetSex(newSex)
+}
+
+func (p *Doctor) SetUserAddress(newAddress string) {
+	p.user.SetAddress(newAddress)
+}
+
+func (p *Doctor) SetUserEmail(newEmail string) {
+	p.user.SetEmail(newEmail)
+}
+
+func (p *Doctor) SetUserPassword(newPassword string) {
+	p.user.SetPassword(newPassword)
+}
+
+func (p *Doctor) SetUserActive(newActive bool) {
+	p.user.SetActive(newActive)
+}
+
+func (p *Doctor) SetUserCellphoneUser(newCellphoneUser CellphoneUser) {
+	p.user.SetCellphoneUser(newCellphoneUser)
 }
 
 func (d Doctor) GetCns() string {
 	return d.cns
 }
 
-func (d Doctor) SetCns(cns string) {
+func (d *Doctor) SetCns(cns string) {
 	d.cns = cns
 }
 
@@ -51,7 +91,7 @@ func (d Doctor) GetCrm() string {
 	return d.crm
 }
 
-func (d Doctor) SetCrm(crm string) {
+func (d *Doctor) SetCrm(crm string) {
 	d.crm = crm
 }
 
@@ -59,6 +99,6 @@ func (d Doctor) GetSpecialty() Specialty {
 	return d.specialty
 }
 
-func (d Doctor) SetSpecialty(specialty Specialty) {
+func (d *Doctor) SetSpecialty(specialty Specialty) {
 	d.specialty = specialty
 }

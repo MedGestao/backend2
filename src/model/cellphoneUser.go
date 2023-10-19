@@ -20,7 +20,7 @@ func (c CellphoneUser) GetUserId() int {
 	return c.userId
 }
 
-func (c CellphoneUser) SetUserId(userId int) {
+func (c *CellphoneUser) SetUserId(userId int) {
 	c.userId = userId
 }
 
@@ -28,6 +28,6 @@ func (c CellphoneUser) GetNumber() string {
 	return c.number
 }
 
-func (c CellphoneUser) SetNumber(number string) {
+func (c *CellphoneUser) SetNumber(number string) {
 	c.number = number
 }

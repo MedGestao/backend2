@@ -31,46 +31,46 @@ func (p Patient) GetUser() User {
 	return p.user
 }
 
-func (p *Patient) SetUser(user User) {
-	p.user = user
-}
+//func (p *Patient) SetUser(user User) {
+//	p.user = user
+//}
 
 func (p *Patient) SetUserId(newId int) {
 	p.user.SetId(newId)
 }
 
-func (p Patient) SetUserName(newName string) {
+func (p *Patient) SetUserName(newName string) {
 	p.user.SetName(newName)
 }
 
-func (p Patient) SetUserBirthDate(newBirthDate time.Time) {
+func (p *Patient) SetUserBirthDate(newBirthDate time.Time) {
 	p.user.SetBirthDate(newBirthDate)
 }
 
-func (p Patient) SetUserCpf(newCpf string) {
+func (p *Patient) SetUserCpf(newCpf string) {
 	p.user.SetCpf(newCpf)
 }
 
-func (p Patient) SetUserSex(newSex string) {
+func (p *Patient) SetUserSex(newSex string) {
 	p.user.SetSex(newSex)
 }
 
-func (p Patient) SetUserAddress(newAddress string) {
+func (p *Patient) SetUserAddress(newAddress string) {
 	p.user.SetAddress(newAddress)
 }
 
-func (p Patient) SetUserEmail(newEmail string) {
+func (p *Patient) SetUserEmail(newEmail string) {
 	p.user.SetEmail(newEmail)
 }
 
-func (p Patient) SetUserPassword(newPassword string) {
+func (p *Patient) SetUserPassword(newPassword string) {
 	p.user.SetPassword(newPassword)
 }
 
-func (p Patient) SetUserActive(newActive bool) {
+func (p *Patient) SetUserActive(newActive bool) {
 	p.user.SetActive(newActive)
 }
 
-func (p Patient) SetUserCellphoneUser(newCellphoneUser CellphoneUser) {
+func (p *Patient) SetUserCellphoneUser(newCellphoneUser CellphoneUser) {
 	p.user.SetCellphoneUser(newCellphoneUser)
 }

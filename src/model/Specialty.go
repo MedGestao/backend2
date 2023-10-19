@@ -15,7 +15,7 @@ func (s Specialty) GetId() int {
 	return s.id
 }
 
-func (s Specialty) SetId(id int) {
+func (s *Specialty) SetId(id int) {
 	s.id = id
 }
 

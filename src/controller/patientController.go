@@ -33,19 +33,7 @@ func PatientRegister() bool {
 	return success
 }
 
-func PatientRegisterEdit() bool {
-	birthDate, err := time.Parse("2006-01-02", "1988-09-22")
-
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	cellphonePatient := model.NewCellphoneUser("82994321567")
-
-	patient := model.NewPatient("Martinho Lutero", birthDate, "11642401202", "M", "Rua Fictícia da Silva",
-		"martinhoLutero@gmail.com", "mL#42", true, cellphonePatient)
-	//patient.SetUser(pa)
-	println("Id: ", patient.GetUser().GetId())
+func PatientRegisterEdit(patient model.Patient) bool {
 
 	success, err := dao.PatientEdit(patient)
 	if err != nil {
@@ -61,12 +49,12 @@ func PatientRegisterEdit() bool {
 	return success
 }
 
-func AuthenticatorLoginPatient(email string, password string) (bool, int) {
+func PatientAuthenticatorLogin(email string, password string) (bool, int) {
 	if email == "" || password == "" {
 		return false, 0
 	}
 
-	Authorized, doctorId, err := dao.ValidateLoginPatient(email, password)
+	Authorized, doctorId, err := dao.PatientValidateLogin(email, password)
 	if err != nil {
 		panic(err)
 	}
@@ -79,4 +67,38 @@ func AuthenticatorLoginPatient(email string, password string) (bool, int) {
 		return false, 0
 	}
 
+}
+
+func PatientSelectRegister(patientId int) model.Patient {
+	var patient model.Patient
+	var err error
+	if patientId != 0 {
+		patient, err = dao.PatientSelectById(patientId)
+		if err != nil {
+			println("Error na busca das informações do paciente: ", err.Error())
+			panic(err)
+		}
+	} else {
+		println("Informe um id de paciente válido!")
+		return patient
+	}
+	return patient
+}
+
+func PatientRegisterOff(patientId int) bool {
+	var success bool
+	var err error
+	if patientId != 0 {
+		success, err = dao.PatientOff(patientId)
+		if err != nil {
+			println("Error durante o desligamento do registro do paciente: ", err.Error())
+			panic(err)
+		}
+	} else {
+		println("Informe um id de paciente válido!")
+		success = false
+		return success
+	}
+
+	return success
 }

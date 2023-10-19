@@ -54,3 +54,53 @@ func AuthenticatorLoginDoctor(email string, password string) (bool, int) {
 	}
 
 }
+
+func DoctorSelectRegister(doctorId int) model.Doctor {
+	var doctor model.Doctor
+	var err error
+	if doctorId != 0 {
+		doctor, err = dao.DoctorSelectById(doctorId)
+		if err != nil {
+			println("Error na busca das informações do paciente: ", err.Error())
+			panic(err)
+		}
+	} else {
+		println("Informe um id de paciente válido!")
+		return doctor
+	}
+	return doctor
+}
+
+func DoctorRegisterEdit(doctor model.Doctor) bool {
+
+	success, err := dao.DoctorEdit(doctor)
+	if err != nil {
+		panic(err)
+	}
+
+	if success == true {
+		println("O cadastro foi alterado com sucesso!")
+	} else {
+		println("Não foi possível alterar o cadastro!")
+	}
+
+	return success
+}
+
+func DoctorRegisterOff(doctorId int) bool {
+	var success bool
+	var err error
+	if doctorId != 0 {
+		success, err = dao.DoctorOff(doctorId)
+		if err != nil {
+			println("Error durante o desligamento do registro do médico: ", err.Error())
+			panic(err)
+		}
+	} else {
+		println("Informe um id de médico válido!")
+		success = false
+		return success
+	}
+
+	return success
+}

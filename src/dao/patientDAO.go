@@ -4,6 +4,8 @@ import (
 	"MedGestao/src/connection"
 	"MedGestao/src/model"
 	"MedGestao/src/util"
+	"database/sql"
+	"time"
 )
 
 func PatientInsert(patient model.Patient) (bool, error) {
@@ -20,8 +22,8 @@ func PatientInsert(patient model.Patient) (bool, error) {
 		return success, err
 	}
 
-	sql := "insert into patient(name, birthdate, cpf, sex, address, active)" +
-		" values ($1, $2, $3, $4, $5, $6) returning id"
+	sql := "insert into patient(name, birthdate, cpf, sex, address, active, registration_date)" +
+		" values ($1, $2, $3, $4, $5, $6, current_timestamp) returning id"
 	_, err = tx.Prepare(sql)
 	if err != nil {
 		tx.Rollback()
@@ -106,88 +108,7 @@ func PatientInsert(patient model.Patient) (bool, error) {
 	return success, nil
 }
 
-func PatientEdit(patient model.Patient) (bool, error) {
-	db, err := connection.NewConnection()
-	success := false
-	if err != nil {
-		return success, err
-	}
-	defer db.Close()
-	tx, err := db.Begin()
-	if err != nil {
-		tx.Rollback()
-		println("Error1: ", err.Error())
-		return success, err
-	}
-
-	sql := "update patient set name = $1, birthdate = $2, cpf = $3, sex = $4, address = $5, active = $6 where id = $7"
-	_, err = tx.Prepare(sql)
-	if err != nil {
-		tx.Rollback()
-		println("Error2: ", err.Error())
-		return success, err
-	}
-	println("Id do paciente: ", patient.GetUser().GetId())
-	_, err = tx.Exec(sql,
-		patient.GetUser().GetName(),
-		patient.GetUser().GetBirthDate(),
-		patient.GetUser().GetCpf(),
-		patient.GetUser().GetSex(),
-		patient.GetUser().GetAddress(),
-		patient.GetUser().IsActive(),
-		patient.GetUser().GetId())
-	if err != nil {
-		tx.Rollback()
-		println("Error3: ", err.Error())
-		return success, err
-	}
-
-	sql = "update cellphone_patient set number = $1 where id = $2 and patient_id = $3"
-	_, err = tx.Prepare(sql)
-	if err != nil {
-		tx.Rollback()
-		println("Error4: ", err.Error())
-		return success, err
-	}
-
-	_, err = tx.Exec(sql,
-		patient.GetUser().GetCellphoneUser().GetNumber(),
-		patient.GetUser().GetCellphoneUser().GetId(),
-		patient.GetUser().GetCellphoneUser().GetUserId())
-	if err != nil {
-		tx.Rollback()
-		println("Error5: ", err.Error())
-		return success, err
-	}
-
-	passwordHashDB, saltDB, err := util.PasswordHash(patient.GetUser().GetPassword())
-	sql = "update patient_authentication_information set patient_email = $1, " +
-		"patient_password = $2, patient_salt = $3 where patient_id = $4"
-
-	_, err = tx.Prepare(sql)
-	if err != nil {
-		tx.Rollback()
-		println("Error6: ", err.Error())
-		return success, err
-	}
-
-	_, err = tx.Exec(sql,
-		patient.GetUser().GetEmail(),
-		passwordHashDB,
-		saltDB,
-		patient.GetUser().GetId())
-	if err != nil {
-		tx.Rollback()
-		println("Error7: ", err.Error())
-		return success, err
-	}
-
-	tx.Commit()
-	success = true
-	return success, nil
-}
-
-func ValidateLoginPatient(emailLogin string, passwordLogin string) (bool, int, error) {
+func PatientValidateLogin(emailLogin string, passwordLogin string) (bool, int, error) {
 	db, err := connection.NewConnection()
 	if err != nil {
 		return false, 0, err
@@ -223,4 +144,162 @@ func ValidateLoginPatient(emailLogin string, passwordLogin string) (bool, int, e
 	}
 
 	return authorized, patientIdDB, err
+}
+
+func PatientSelectById(patientId int) (model.Patient, error) {
+	db, err := connection.NewConnection()
+	if err != nil {
+		println("Error1: ", err.Error())
+	}
+	defer db.Close()
+
+	sql := "select distinct on (p.cpf) p.name, p.birthdate, p.cpf, p.sex, p.address, cp.number, pai.patient_email, p.active from patient p " +
+		"left join cellphone_patient cp on p.id = cp.patient_id " +
+		"left join patient_authentication_information pai on p.id = pai.patient_id " +
+		"where p.id = $1 and p.active is true"
+	_, err = db.Prepare(sql)
+	if err != nil {
+		println("Error3: ", err.Error())
+	}
+
+	var patientNameDB, patientSexDB, patientCpfDB, patientAddressDB, patientNumberDB, patientEmailDB string
+	var patientBirthdateDB time.Time
+	var patientActiveDB bool
+	var patient model.Patient
+	rows, err := db.Query(sql, patientId)
+	for rows.Next() {
+		err = rows.Scan(&patientNameDB, &patientBirthdateDB, &patientSexDB, &patientCpfDB, &patientAddressDB, &patientNumberDB, &patientEmailDB, &patientActiveDB)
+		if err != nil {
+			println("Error nos dados retornados: ", err.Error())
+			return patient, err
+		}
+	}
+	patient = model.NewPatient(patientNameDB, patientBirthdateDB, patientCpfDB, patientSexDB, patientAddressDB, patientEmailDB, "", patientActiveDB, model.NewCellphoneUser(patientNumberDB))
+
+	return patient, nil
+
+}
+
+func PatientEdit(patient model.Patient) (bool, error) {
+	db, err := connection.NewConnection()
+	success := false
+	if err != nil {
+		return success, err
+	}
+	defer db.Close()
+
+	tx, err := db.Begin()
+	if err != nil {
+		tx.Rollback()
+		println("Error1: ", err.Error())
+		return success, err
+	}
+
+	sql := "update patient set name = $1, birthdate = $2, cpf = $3, sex = $4, address = $5, " +
+		"active = $6, last_modified_date = current_timestamp where id = $7 returning id"
+	_, err = tx.Prepare(sql)
+	if err != nil {
+		tx.Rollback()
+		println("Error2: ", err.Error())
+		return success, err
+	}
+	println("Id do paciente: ", patient.GetUser().GetId())
+	var tempPatientId int
+	err = tx.QueryRow(sql,
+		patient.GetUser().GetName(),
+		patient.GetUser().GetBirthDate(),
+		patient.GetUser().GetCpf(),
+		patient.GetUser().GetSex(),
+		patient.GetUser().GetAddress(),
+		patient.GetUser().IsActive(),
+		patient.GetUser().GetId()).Scan(&tempPatientId)
+	if err != nil {
+		tx.Rollback()
+		println("Error3: ", err.Error())
+		return success, err
+	}
+
+	sql = "update cellphone_patient set number = $1 where patient_id = $2"
+	_, err = tx.Prepare(sql)
+	if err != nil {
+		tx.Rollback()
+		println("Error4: ", err.Error())
+		return success, err
+	}
+
+	_, err = tx.Exec(sql,
+		patient.GetUser().GetCellphoneUser().GetNumber(),
+		tempPatientId)
+	if err != nil {
+		tx.Rollback()
+		println("Error5: ", err.Error())
+		return success, err
+	}
+
+	if (patient.GetUser().GetEmail() == "") || (patient.GetUser().GetPassword() == "") {
+		tx.Commit()
+	} else {
+		err = PatientEditLogin(patient.GetUser().GetEmail(), patient.GetUser().GetPassword(), tempPatientId, tx)
+		if err != nil {
+			tx.Rollback()
+			println("Error 6: ", err.Error())
+			return success, err
+		}
+		tx.Commit()
+	}
+
+	success = true
+	return success, nil
+}
+
+func PatientEditLogin(email string, password string, patientId int, tx *sql.Tx) error {
+
+	passwordHashDB, saltDB, err := util.PasswordHash(password)
+	sql := "update patient_authentication_information set patient_email = $1, " +
+		"patient_password = $2, patient_salt = $3 where patient_id = $4"
+
+	_, err = tx.Prepare(sql)
+	if err != nil {
+		tx.Rollback()
+		println("Error de preparação de sql de update de login: ", err.Error())
+		return err
+	}
+
+	_, err = tx.Exec(sql,
+		email,
+		passwordHashDB,
+		saltDB,
+		patientId)
+	if err != nil {
+		tx.Rollback()
+		println("Error de execução do sql de update de login: ", err.Error())
+		return err
+	}
+
+	return nil
+}
+
+func PatientOff(patientId int) (bool, error) {
+	success := false
+	db, err := connection.NewConnection()
+	if err != nil {
+		println("ErrorDesligamento1: ", err.Error())
+		return false, err
+	}
+
+	sql := "update patient set active = false where id = $1"
+	_, err = db.Prepare(sql)
+	if err != nil {
+		println("ErrorDesligamento2: ", err.Error())
+		return success, err
+	}
+
+	_, err = db.Exec(sql, patientId)
+	if err != nil {
+		println("ErrorDesligamento3: ", err.Error())
+		return success, err
+	}
+
+	success = true
+	return success, nil
 }
