@@ -3,44 +3,24 @@ package controller
 import (
 	"MedGestao/src/dao"
 	"MedGestao/src/model"
-	"time"
 )
 
-func DoctorRegister() bool {
-	birthDate, err := time.Parse("2006-01-02", "1992-07-05")
+func DoctorRegister(doctor model.Doctor) bool {
 
-	cellphoneDoctor := model.NewCellphoneUser("82996426813")
-
-	specialty := model.NewSpecialty("Clínica Geral")
-
-	success, err := dao.InsertSpecialty(specialty)
+	success, err := dao.InsertDoctor(doctor)
 	if err != nil {
 		panic(err)
-	}
-
-	doctor := model.NewDoctor("Ana Paula", birthDate, "45567599203", "F", "Rua Fictícia dos Santos",
-		"anaPaula3@gmail.com", cellphoneDoctor, "Ap#144", true, "5940377689", "2342584354", specialty)
-
-	success, err = dao.InsertDoctor(doctor)
-	if err != nil {
-		panic(err)
-	}
-
-	if success == true {
-		println("O cadastro foi realizado com sucesso!")
-	} else {
-		println("O cadastro não foi realizado!")
 	}
 
 	return success
 }
 
-func AuthenticatorLoginDoctor(email string, password string) (bool, int) {
+func DoctorAuthenticatorLogin(email string, password string) (bool, int) {
 	if email == "" || password == "" {
 		return false, 0
 	}
 
-	Authorized, doctorId, err := dao.ValidateLoginDoctor(email, password)
+	Authorized, doctorId, err := dao.DoctorValidateLogin(email, password)
 	if err != nil {
 		panic(err)
 	}
@@ -76,12 +56,6 @@ func DoctorRegisterEdit(doctor model.Doctor) bool {
 	success, err := dao.DoctorEdit(doctor)
 	if err != nil {
 		panic(err)
-	}
-
-	if success == true {
-		println("O cadastro foi alterado com sucesso!")
-	} else {
-		println("Não foi possível alterar o cadastro!")
 	}
 
 	return success

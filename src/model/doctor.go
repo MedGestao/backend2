@@ -4,13 +4,12 @@ import "time"
 
 type Doctor struct {
 	user      User
-	cns       string
 	crm       string
 	specialty Specialty
 }
 
 func NewDoctor(name string, birthDate time.Time, cpf string, sex string,
-	address string, email string, cellphoneDoctor CellphoneUser, password string, active bool, cns string, crm string, specialty Specialty) Doctor {
+	address string, email string, cellphoneDoctor CellphoneUser, password string, active bool, crm string, specialty Specialty) Doctor {
 	u := User{
 		name:          name,
 		birthDate:     birthDate,
@@ -25,7 +24,6 @@ func NewDoctor(name string, birthDate time.Time, cpf string, sex string,
 
 	return Doctor{
 		user:      u,
-		cns:       cns,
 		crm:       crm,
 		specialty: specialty,
 	}
@@ -77,14 +75,6 @@ func (p *Doctor) SetUserActive(newActive bool) {
 
 func (p *Doctor) SetUserCellphoneUser(newCellphoneUser CellphoneUser) {
 	p.user.SetCellphoneUser(newCellphoneUser)
-}
-
-func (d Doctor) GetCns() string {
-	return d.cns
-}
-
-func (d *Doctor) SetCns(cns string) {
-	d.cns = cns
 }
 
 func (d Doctor) GetCrm() string {

@@ -21,8 +21,8 @@ func InsertDoctor(doctor model.Doctor) (bool, error) {
 		return false, err
 	}
 
-	sql := "insert into doctor(name, birthdate, cpf, sex, address, cns, crm, active)" +
-		" values ($1, $2, $3, $4, $5, $6, $7, $8) returning id"
+	sql := "insert into doctor(name, birthdate, cpf, sex, address, crm, active)" +
+		" values ($1, $2, $3, $4, $5, $6, $7) returning id"
 	_, err = tx.Prepare(sql)
 	if err != nil {
 		tx.Rollback()
@@ -43,7 +43,6 @@ func InsertDoctor(doctor model.Doctor) (bool, error) {
 		doctor.GetUser().GetCpf(),
 		doctor.GetUser().GetSex(),
 		doctor.GetUser().GetAddress(),
-		doctor.GetCns(),
 		doctor.GetCrm(),
 		doctor.GetUser().IsActive(),
 	).Scan(&tempDoctorId)
@@ -117,7 +116,7 @@ func InsertDoctor(doctor model.Doctor) (bool, error) {
 	return true, nil
 }
 
-func ValidateLoginDoctor(emailLogin string, passwordLogin string) (bool, int, error) {
+func DoctorValidateLogin(emailLogin string, passwordLogin string) (bool, int, error) {
 	db, err := connection.NewConnection()
 	defer db.Close()
 	if err != nil {
@@ -162,7 +161,7 @@ func DoctorSelectById(doctorId int) (model.Doctor, error) {
 	}
 	defer db.Close()
 
-	sql := "select distinct on (d.cpf) d.name, d.birthdate, d.sex, d.cpf, d.address, cd.number, d.cns, d.crm, dai.doctor_email, s.description as specialty, d.active from doctor d " +
+	sql := "select distinct on (d.cpf) d.name, d.birthdate, d.sex, d.cpf, d.address, cd.number, d.crm, dai.doctor_email, s.description as specialty, d.active from doctor d " +
 		"left join cellphone_doctor cd on d.id = cd.doctor_id " +
 		"left join doctor_authentication_information dai on d.id = dai.doctor_id " +
 		"left join medical_specialty ms on d.id = ms.doctor_id " +
@@ -178,7 +177,6 @@ func DoctorSelectById(doctorId int) (model.Doctor, error) {
 		doctorAddressDB,
 		doctorNumberDB,
 		doctorEmailDB,
-		doctorCns,
 		doctorCrm,
 		doctorSpecialty string
 	var doctorBirthdateDB time.Time
@@ -194,7 +192,6 @@ func DoctorSelectById(doctorId int) (model.Doctor, error) {
 			&doctorCpfDB,
 			&doctorAddressDB,
 			&doctorNumberDB,
-			&doctorCns,
 			&doctorCrm,
 			&doctorSpecialty,
 			&doctorEmailDB,
@@ -204,7 +201,7 @@ func DoctorSelectById(doctorId int) (model.Doctor, error) {
 			return doctor, err
 		}
 	}
-	doctor = model.NewDoctor(doctorNameDB, doctorBirthdateDB, doctorCpfDB, doctorSexDB, doctorAddressDB, doctorEmailDB, model.NewCellphoneUser(doctorNumberDB), "", doctorActiveDB, doctorCns, doctorCrm, model.NewSpecialty(doctorSpecialty))
+	doctor = model.NewDoctor(doctorNameDB, doctorBirthdateDB, doctorCpfDB, doctorSexDB, doctorAddressDB, doctorEmailDB, model.NewCellphoneUser(doctorNumberDB), "", doctorActiveDB, doctorCrm, model.NewSpecialty(doctorSpecialty))
 
 	return doctor, nil
 
@@ -225,8 +222,8 @@ func DoctorEdit(doctor model.Doctor) (bool, error) {
 		return success, err
 	}
 
-	sql := "update doctor set name = $1, birthdate = $2, cpf = $3, sex = $4, address = $5, cns = $6, crm = $7, " +
-		"active = $8, last_modified_date = current_timestamp where id = $9 returning id"
+	sql := "update doctor set name = $1, birthdate = $2, cpf = $3, sex = $4, address = $5, crm = $6, " +
+		"active = $7, last_modified_date = current_timestamp where id = $8 returning id"
 	_, err = tx.Prepare(sql)
 	if err != nil {
 		tx.Rollback()
@@ -241,7 +238,6 @@ func DoctorEdit(doctor model.Doctor) (bool, error) {
 		doctor.GetUser().GetCpf(),
 		doctor.GetUser().GetSex(),
 		doctor.GetUser().GetAddress(),
-		doctor.GetCns(),
 		doctor.GetCrm(),
 		doctor.GetUser().IsActive(),
 		doctor.GetUser().GetId()).Scan(&tempDoctorId)

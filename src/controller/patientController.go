@@ -3,31 +3,13 @@ package controller
 import (
 	"MedGestao/src/dao"
 	"MedGestao/src/model"
-	"fmt"
-	"time"
 )
 
-func PatientRegister() bool {
-	birthDate, err := time.Parse("2006-01-02", "1982-09-22")
-
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	cellphonePatient := model.NewCellphoneUser("82994321525")
-
-	patient := model.NewPatient("Robson Alves", birthDate, "11642401202", "M", "Rua Fictícia da Silva",
-		"robson@gmail.com", "33333", true, cellphonePatient)
+func PatientRegister(patient model.Patient) bool {
 
 	success, err := dao.PatientInsert(patient)
 	if err != nil {
 		panic(err)
-	}
-
-	if success == true {
-		println("O cadastro foi realizado com sucesso!")
-	} else {
-		println("O cadastro não foi realizado!")
 	}
 
 	return success
