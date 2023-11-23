@@ -105,11 +105,11 @@ func EditPatient(w http.ResponseWriter, r *http.Request) {
 	if success == true {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(dataRequest)
+		json.NewEncoder(w).Encode("Cadastro do paciente alterado com sucesso!")
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotAcceptable)
-		//json.NewEncoder(w).Encode(dataRequest)
+		json.NewEncoder(w).Encode("Não foi possível editar o cadastro do paciente!")
 	}
 }
 

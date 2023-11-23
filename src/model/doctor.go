@@ -9,7 +9,7 @@ type Doctor struct {
 }
 
 func NewDoctor(name string, birthDate time.Time, cpf string, sex string,
-	address string, email string, cellphoneDoctor CellphoneUser, password string, active bool, crm string, specialty Specialty) Doctor {
+	address string, email string, cellphoneDoctor CellphoneUser, password string, imageUrl string, crm string, specialty Specialty) Doctor {
 	u := User{
 		name:          name,
 		birthDate:     birthDate,
@@ -19,7 +19,7 @@ func NewDoctor(name string, birthDate time.Time, cpf string, sex string,
 		email:         email,
 		cellphoneUser: cellphoneDoctor,
 		password:      password,
-		active:        active,
+		imageUrl:      imageUrl,
 	}
 
 	return Doctor{

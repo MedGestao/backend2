@@ -18,7 +18,8 @@ func PatientRegister(patientRequest request.PatientRequest) (bool, error) {
 	//name string, birthDate time.Time, cpf string, sex string,
 	//	address string, email string, password string, active bool, cellphonePatient CellphoneUser
 	patient := model.NewPatient(patientRequest.User.Name, patientRequest.User.BirthDate, patientRequest.User.Cpf,
-		patientRequest.User.Sex, patientRequest.User.Address, patientRequest.User.Email, patientRequest.User.Password, cellPhoneUser)
+		patientRequest.User.Sex, patientRequest.User.Address, patientRequest.User.Email, patientRequest.User.Password,
+		patientRequest.User.ImageUrl, cellPhoneUser)
 
 	success, err = dao.PatientInsert(patient)
 	if err != nil {
@@ -42,7 +43,8 @@ func PatientRegisterEdit(idPatientRequest request.PatientIdRequest, patientReque
 	//name string, birthDate time.Time, cpf string, sex string,
 	//	address string, email string, password string, active bool, cellphonePatient CellphoneUser
 	patient := model.NewPatient(patientRequest.User.Name, patientRequest.User.BirthDate, patientRequest.User.Cpf,
-		patientRequest.User.Sex, patientRequest.User.Address, patientRequest.User.Email, patientRequest.User.Password, cellPhoneUser)
+		patientRequest.User.Sex, patientRequest.User.Address, patientRequest.User.Email, patientRequest.User.Password,
+		patientRequest.User.ImageUrl, cellPhoneUser)
 
 	success, err = dao.PatientEdit(idPatientRequest.Id, patient)
 	if err != nil {
@@ -96,6 +98,7 @@ func PatientSelectByIdRegister(patientId int) (response.PatientResponse, error) 
 			Sex:           p.GetUser().GetSex(),
 			Address:       p.GetUser().GetAddress(),
 			Email:         p.GetUser().GetEmail(),
+			ImageUrl:      p.GetUser().GetImageUrl(),
 			CellphoneUser: cellphoneUserResponse,
 		}
 		patient = response.PatientResponse{

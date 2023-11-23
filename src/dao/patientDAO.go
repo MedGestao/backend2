@@ -22,8 +22,8 @@ func PatientInsert(patient model.Patient) (bool, error) {
 		return success, err
 	}
 
-	sql := "insert into patient(name, birthdate, cpf, sex, address, active, registration_date)" +
-		" values ($1, $2, $3, $4, $5, true, current_timestamp) returning id"
+	sql := "insert into patient(name, birthdate, cpf, sex, address, image_url, active, registration_date)" +
+		" values ($1, $2, $3, $4, $5, $6, true, current_timestamp) returning id"
 	_, err = tx.Prepare(sql)
 	if err != nil {
 		tx.Rollback()
@@ -52,6 +52,7 @@ func PatientInsert(patient model.Patient) (bool, error) {
 		patient.GetUser().GetCpf(),
 		patient.GetUser().GetSex(),
 		patient.GetUser().GetAddress(),
+		patient.GetUser().GetImageUrl(),
 	).Scan(&tempPatientId)
 
 	if err != nil {
@@ -152,7 +153,7 @@ func PatientSelectById(patientId int) (model.Patient, error) {
 	}
 	defer db.Close()
 
-	sql := "select distinct on (p.cpf) p.name, p.birthdate, p.sex, p.cpf, p.address, cp.number, pai.patient_email, p.active from patient p " +
+	sql := "select distinct on (p.cpf) p.name, p.birthdate, p.sex, p.cpf, p.address, cp.number, pai.patient_email, p.image_url, p.active from patient p " +
 		"left join cellphone_patient cp on p.id = cp.patient_id " +
 		"left join patient_authentication_information pai on p.id = pai.patient_id " +
 		"where p.id = $1 and p.active is true"
@@ -161,19 +162,19 @@ func PatientSelectById(patientId int) (model.Patient, error) {
 		println("Error3: ", err.Error())
 	}
 
-	var patientNameDB, patientSexDB, patientCpfDB, patientAddressDB, patientNumberDB, patientEmailDB string
+	var patientNameDB, patientSexDB, patientCpfDB, patientAddressDB, patientNumberDB, patientEmailDB, patientImageUrlDB string
 	var patientBirthdateDB time.Time
 	var patientActiveDB bool
 	var patient model.Patient
 	rows, err := db.Query(sql, patientId)
 	for rows.Next() {
-		err = rows.Scan(&patientNameDB, &patientBirthdateDB, &patientSexDB, &patientCpfDB, &patientAddressDB, &patientNumberDB, &patientEmailDB, &patientActiveDB)
+		err = rows.Scan(&patientNameDB, &patientBirthdateDB, &patientSexDB, &patientCpfDB, &patientAddressDB, &patientNumberDB, &patientEmailDB, &patientImageUrlDB, &patientActiveDB)
 		if err != nil {
 			println("Error nos dados retornados: ", err.Error())
 			return patient, err
 		}
 	}
-	patient = model.NewPatient(patientNameDB, patientBirthdateDB, patientCpfDB, patientSexDB, patientAddressDB, patientEmailDB, "", model.NewCellphoneUser(patientNumberDB))
+	patient = model.NewPatient(patientNameDB, patientBirthdateDB, patientCpfDB, patientSexDB, patientAddressDB, patientEmailDB, "", patientImageUrlDB, model.NewCellphoneUser(patientNumberDB))
 	patient.SetUserActive(patientActiveDB)
 
 	return patient, nil
@@ -195,8 +196,8 @@ func PatientEdit(idPatient int, patient model.Patient) (bool, error) {
 		return success, err
 	}
 
-	sql := "update patient set name = $1, birthdate = $2, cpf = $3, sex = $4, address = $5, " +
-		"active = true, last_modified_date = current_timestamp where id = $6"
+	sql := "update patient set name = $1, birthdate = $2, cpf = $3, sex = $4, address = $5, image_url = $6, " +
+		"active = true, last_modified_date = current_timestamp where id = $7"
 	_, err = tx.Prepare(sql)
 	if err != nil {
 		tx.Rollback()
@@ -210,6 +211,7 @@ func PatientEdit(idPatient int, patient model.Patient) (bool, error) {
 		patient.GetUser().GetCpf(),
 		patient.GetUser().GetSex(),
 		patient.GetUser().GetAddress(),
+		patient.GetUser().GetImageUrl(),
 		idPatient)
 	if err != nil {
 		tx.Rollback()
@@ -278,7 +280,7 @@ func PatientEditLogin(email string, password string, patientId int, tx *sql.Tx) 
 }
 
 func PatientOff(patientId int) (bool, error) {
-	success := false
+	var success bool
 	db, err := connection.NewConnection()
 	if err != nil {
 		println("ErrorDesligamento1: ", err.Error())
@@ -299,5 +301,5 @@ func PatientOff(patientId int) (bool, error) {
 	}
 
 	success = true
-	return success, nil
+	return success, err
 }

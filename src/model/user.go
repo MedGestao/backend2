@@ -14,6 +14,7 @@ type User struct {
 	email         string
 	password      string
 	active        bool
+	imageUrl      string
 	cellphoneUser CellphoneUser
 }
 
@@ -87,6 +88,14 @@ func (u User) IsActive() bool {
 
 func (u *User) SetActive(activity bool) {
 	u.active = activity
+}
+
+func (u User) GetImageUrl() string {
+	return u.imageUrl
+}
+
+func (u *User) SetImageUrl(imageUrl string) {
+	u.imageUrl = imageUrl
 }
 
 func (u User) GetCellphoneUser() CellphoneUser {
