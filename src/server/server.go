@@ -13,7 +13,7 @@ type message struct {
 }
 
 func OpenServer() {
-	fs := http.FileServer(http.Dir("frontend/pages"))
+	fs := http.FileServer(http.Dir("frontend/"))
 	http.Handle("/", fs)
 
 	http.HandleFunc("/api/data", handleAPIResquest)
@@ -32,6 +32,10 @@ func handleAPIResquest(w http.ResponseWriter, r *http.Request) {
 			message: "olá" + n + "!",
 			name:    n,
 		}
+
+		// Imprimir a mensagem no console do servidor
+		fmt.Println("Mensagem recebida:", response.message)
+		fmt.Println("Nome recebido:", response.name)
 
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)

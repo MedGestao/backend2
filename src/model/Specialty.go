@@ -23,6 +23,6 @@ func (s Specialty) GetDescription() string {
 	return s.description
 }
 
-func (s Specialty) SetDescription(description string) {
+func (s *Specialty) SetDescription(description string) {
 	s.description = description
 }

@@ -23,7 +23,7 @@ func PatientInsert(patient model.Patient) (bool, error) {
 	}
 
 	sql := "insert into patient(name, birthdate, cpf, sex, address, active, registration_date)" +
-		" values ($1, $2, $3, $4, $5, $6, current_timestamp) returning id"
+		" values ($1, $2, $3, $4, $5, true, current_timestamp) returning id"
 	_, err = tx.Prepare(sql)
 	if err != nil {
 		tx.Rollback()
@@ -32,13 +32,13 @@ func PatientInsert(patient model.Patient) (bool, error) {
 	}
 
 	println(sql)
-	println(patient.GetUser().GetName())
-	println(patient.GetUser().GetBirthDate().Date())
-	println(patient.GetUser().GetCpf())
-	println(patient.GetUser().GetSex())
-	println(patient.GetUser().GetAddress())
-	println(patient.GetUser().GetEmail())
-	println("Telefone: ", patient.GetUser().GetCellphoneUser().GetNumber())
+	//println(patient.GetUser().GetEmail())
+	//println(patient.GetUser().GetBirthDate().Date())
+	//println(patient.GetUser().GetCpf())
+	//println(patient.GetUser().GetSex())
+	//println(patient.GetUser().GetAddress())
+	//println(patient.GetUser().GetEmail())
+	//println("Telefone: ", patient.GetUser().GetCellphoneUser().GetNumber())
 
 	if err != nil {
 		println("Error geração do hash do password: ", err.Error())
@@ -52,7 +52,6 @@ func PatientInsert(patient model.Patient) (bool, error) {
 		patient.GetUser().GetCpf(),
 		patient.GetUser().GetSex(),
 		patient.GetUser().GetAddress(),
-		patient.GetUser().IsActive(),
 	).Scan(&tempPatientId)
 
 	if err != nil {
@@ -153,7 +152,7 @@ func PatientSelectById(patientId int) (model.Patient, error) {
 	}
 	defer db.Close()
 
-	sql := "select distinct on (p.cpf) p.name, p.birthdate, p.cpf, p.sex, p.address, cp.number, pai.patient_email, p.active from patient p " +
+	sql := "select distinct on (p.cpf) p.name, p.birthdate, p.sex, p.cpf, p.address, cp.number, pai.patient_email, p.active from patient p " +
 		"left join cellphone_patient cp on p.id = cp.patient_id " +
 		"left join patient_authentication_information pai on p.id = pai.patient_id " +
 		"where p.id = $1 and p.active is true"
@@ -174,13 +173,14 @@ func PatientSelectById(patientId int) (model.Patient, error) {
 			return patient, err
 		}
 	}
-	patient = model.NewPatient(patientNameDB, patientBirthdateDB, patientCpfDB, patientSexDB, patientAddressDB, patientEmailDB, "", patientActiveDB, model.NewCellphoneUser(patientNumberDB))
+	patient = model.NewPatient(patientNameDB, patientBirthdateDB, patientCpfDB, patientSexDB, patientAddressDB, patientEmailDB, "", model.NewCellphoneUser(patientNumberDB))
+	patient.SetUserActive(patientActiveDB)
 
 	return patient, nil
 
 }
 
-func PatientEdit(patient model.Patient) (bool, error) {
+func PatientEdit(idPatient int, patient model.Patient) (bool, error) {
 	db, err := connection.NewConnection()
 	success := false
 	if err != nil {
@@ -196,23 +196,21 @@ func PatientEdit(patient model.Patient) (bool, error) {
 	}
 
 	sql := "update patient set name = $1, birthdate = $2, cpf = $3, sex = $4, address = $5, " +
-		"active = $6, last_modified_date = current_timestamp where id = $7 returning id"
+		"active = true, last_modified_date = current_timestamp where id = $6"
 	_, err = tx.Prepare(sql)
 	if err != nil {
 		tx.Rollback()
 		println("Error2: ", err.Error())
 		return success, err
 	}
-	println("Id do paciente: ", patient.GetUser().GetId())
-	var tempPatientId int
-	err = tx.QueryRow(sql,
+	println("Id do paciente: ", idPatient)
+	_, err = tx.Exec(sql,
 		patient.GetUser().GetName(),
 		patient.GetUser().GetBirthDate(),
 		patient.GetUser().GetCpf(),
 		patient.GetUser().GetSex(),
 		patient.GetUser().GetAddress(),
-		patient.GetUser().IsActive(),
-		patient.GetUser().GetId()).Scan(&tempPatientId)
+		idPatient)
 	if err != nil {
 		tx.Rollback()
 		println("Error3: ", err.Error())
@@ -229,7 +227,7 @@ func PatientEdit(patient model.Patient) (bool, error) {
 
 	_, err = tx.Exec(sql,
 		patient.GetUser().GetCellphoneUser().GetNumber(),
-		tempPatientId)
+		idPatient)
 	if err != nil {
 		tx.Rollback()
 		println("Error5: ", err.Error())
@@ -239,7 +237,7 @@ func PatientEdit(patient model.Patient) (bool, error) {
 	if (patient.GetUser().GetEmail() == "") || (patient.GetUser().GetPassword() == "") {
 		tx.Commit()
 	} else {
-		err = PatientEditLogin(patient.GetUser().GetEmail(), patient.GetUser().GetPassword(), tempPatientId, tx)
+		err = PatientEditLogin(patient.GetUser().GetEmail(), patient.GetUser().GetPassword(), idPatient, tx)
 		if err != nil {
 			tx.Rollback()
 			println("Error 6: ", err.Error())

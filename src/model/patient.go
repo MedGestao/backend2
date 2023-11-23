@@ -7,7 +7,7 @@ type Patient struct {
 }
 
 func NewPatient(name string, birthDate time.Time, cpf string, sex string,
-	address string, email string, password string, active bool, cellphonePatient CellphoneUser) Patient {
+	address string, email string, password string, cellphonePatient CellphoneUser) Patient {
 
 	u := User{
 		name:          name,
@@ -17,7 +17,6 @@ func NewPatient(name string, birthDate time.Time, cpf string, sex string,
 		address:       address,
 		email:         email,
 		password:      password,
-		active:        active,
 		cellphoneUser: cellphonePatient,
 	}
 

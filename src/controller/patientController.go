@@ -3,23 +3,50 @@ package controller
 import (
 	"MedGestao/src/dao"
 	"MedGestao/src/model"
+	"MedGestao/src/request"
+	"MedGestao/src/response"
 )
 
-func PatientRegister(patient model.Patient) bool {
+func PatientRegister(patientRequest request.PatientRequest) (bool, error) {
 
-	success, err := dao.PatientInsert(patient)
+	var success bool
+	var err error
+	if patientRequest.User.Name == "" {
+		return success, err
+	}
+	cellPhoneUser := model.NewCellphoneUser(patientRequest.User.CellphoneUser.Number)
+	//name string, birthDate time.Time, cpf string, sex string,
+	//	address string, email string, password string, active bool, cellphonePatient CellphoneUser
+	patient := model.NewPatient(patientRequest.User.Name, patientRequest.User.BirthDate, patientRequest.User.Cpf,
+		patientRequest.User.Sex, patientRequest.User.Address, patientRequest.User.Email, patientRequest.User.Password, cellPhoneUser)
+
+	success, err = dao.PatientInsert(patient)
 	if err != nil {
-		panic(err)
+		return success, err
 	}
 
-	return success
+	return success, err
 }
 
-func PatientRegisterEdit(patient model.Patient) bool {
+func PatientRegisterEdit(idPatientRequest request.PatientIdRequest, patientRequest request.PatientRequest) (bool, error) {
 
-	success, err := dao.PatientEdit(patient)
+	var success bool
+	var err error
+
+	//Adicionar essas condições depois: || patient == nil || patient.User == nil no lugar da que está comparando o nome
+	if idPatientRequest.Id == 0 || patientRequest.User.Name == "" {
+		return success, err
+	}
+
+	cellPhoneUser := model.NewCellphoneUser(patientRequest.User.CellphoneUser.Number)
+	//name string, birthDate time.Time, cpf string, sex string,
+	//	address string, email string, password string, active bool, cellphonePatient CellphoneUser
+	patient := model.NewPatient(patientRequest.User.Name, patientRequest.User.BirthDate, patientRequest.User.Cpf,
+		patientRequest.User.Sex, patientRequest.User.Address, patientRequest.User.Email, patientRequest.User.Password, cellPhoneUser)
+
+	success, err = dao.PatientEdit(idPatientRequest.Id, patient)
 	if err != nil {
-		panic(err)
+		return success, err
 	}
 
 	if success == true {
@@ -28,59 +55,72 @@ func PatientRegisterEdit(patient model.Patient) bool {
 		println("Não foi possível alterar o cadastro!")
 	}
 
-	return success
+	return success, err
 }
 
-func PatientAuthenticatorLogin(email string, password string) (bool, int) {
+func PatientAuthenticatorLogin(email string, password string) (bool, int, error) {
+	var authorized bool
+	var patientId int
+	var err error
 	if email == "" || password == "" {
-		return false, 0
+		return authorized, patientId, err
 	}
 
-	Authorized, doctorId, err := dao.PatientValidateLogin(email, password)
+	authorized, patientId, err = dao.PatientValidateLogin(email, password)
 	if err != nil {
-		panic(err)
+		return authorized, patientId, err
 	}
 
-	if Authorized == true {
-		println("Entrou :)")
-		return true, doctorId
-	} else {
-		println("Não entrou :(")
-		return false, 0
-	}
+	return authorized, patientId, err
 
 }
 
-func PatientSelectRegister(patientId int) model.Patient {
-	var patient model.Patient
+func PatientSelectByIdRegister(patientId int) (response.PatientResponse, error) {
+	var p model.Patient
+	var patient response.PatientResponse
 	var err error
 	if patientId != 0 {
-		patient, err = dao.PatientSelectById(patientId)
+		p, err = dao.PatientSelectById(patientId)
 		if err != nil {
 			println("Error na busca das informações do paciente: ", err.Error())
-			panic(err)
+			return patient, err
+		}
+
+		cellphoneUserResponse := response.CellphoneResponse{
+			Number: p.GetUser().GetCellphoneUser().GetNumber(),
+		}
+		userResponse := response.UserResponse{
+			Name:          p.GetUser().GetName(),
+			BirthDate:     p.GetUser().GetBirthDate(),
+			Cpf:           p.GetUser().GetCpf(),
+			Sex:           p.GetUser().GetSex(),
+			Address:       p.GetUser().GetAddress(),
+			Email:         p.GetUser().GetEmail(),
+			CellphoneUser: cellphoneUserResponse,
+		}
+		patient = response.PatientResponse{
+			User: userResponse,
 		}
 	} else {
 		println("Informe um id de paciente válido!")
-		return patient
 	}
-	return patient
+	return patient, err
 }
 
-func PatientRegisterOff(patientId int) bool {
+func PatientRegisterOff(patientId int) (bool, error) {
 	var success bool
 	var err error
 	if patientId != 0 {
 		success, err = dao.PatientOff(patientId)
 		if err != nil {
 			println("Error durante o desligamento do registro do paciente: ", err.Error())
-			panic(err)
+			return success, err
 		}
 	} else {
 		println("Informe um id de paciente válido!")
 		success = false
-		return success
+		return success, err
 	}
 
-	return success
+	return success, err
 }
