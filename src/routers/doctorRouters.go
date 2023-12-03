@@ -6,7 +6,10 @@ import (
 	"MedGestao/src/response"
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 func CreateDoctor(w http.ResponseWriter, r *http.Request) {
@@ -36,21 +39,25 @@ func CreateDoctor(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode("Médico cadastrado com sucesso!")
 	} else {
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusNotAcceptable)
-		json.NewEncoder(w).Encode("Não foi possível cadastrar o médico!")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(response.NewErrorResponse("Não foi possível cadastrar o médico!"))
 	}
 }
 
 func GetDoctorById(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
 	// Decodifica os dados JSON do corpo da solicitação
-	var idRequest request.DoctorIdRequest
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&idRequest); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	id := params["id"]
+	if id == "" {
+		http.Error(w, "Id não foi informado", http.StatusBadRequest)
 		return
 	}
 
-	doctorId := idRequest.Id
+	doctorId, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	// Chama a função que lê o paciente do banco de dados
 	doctor, err := controller.DoctorSelectRegisterById(doctorId)
@@ -88,7 +95,7 @@ func EditDoctor(w http.ResponseWriter, r *http.Request) {
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotAcceptable)
-		json.NewEncoder(w).Encode("Não foi possivel alterar o cadastro!")
+		json.NewEncoder(w).Encode(response.NewErrorResponse("Não foi possivel alterar o cadastro!"))
 	}
 }
 
@@ -114,7 +121,7 @@ func ValidateLoginDoctor(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(doctorIdResponse)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusNotAcceptable)
+		w.WriteHeader(http.StatusUnauthorized)
 	}
 }
 
@@ -143,6 +150,6 @@ func DeactivateDoctor(w http.ResponseWriter, r *http.Request) {
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotAcceptable)
-		json.NewEncoder(w).Encode("Não foi possível desativar o médico!")
+		json.NewEncoder(w).Encode(response.NewErrorResponse("Não foi possível desativar o médico!"))
 	}
 }
