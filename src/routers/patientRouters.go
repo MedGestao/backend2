@@ -7,7 +7,10 @@ import (
 	"MedGestao/src/util"
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 func CreatePatient(w http.ResponseWriter, r *http.Request) {
@@ -54,23 +57,19 @@ func CreatePatient(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetPatientById(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
 	// Decodifica os dados JSON do corpo da solicitação
-	var idRequest request.PatientIdRequest
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&idRequest); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	id := params["id"]
+	if id == "" {
+		http.Error(w, "Id não foi informado", http.StatusBadRequest)
 		return
 	}
 
-	//vars := mux.Vars(r)
-	//idRequest := vars["id"]
-	//patientId, err := strconv.Atoi(idRequest)
-	//if err != nil {
-	//	http.Error(w, err.Error(), http.StatusInternalServerError)
-	//	return
-	//}
-
-	patientId := idRequest.Id
+	patientId, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	// Chama a função que lê o paciente do banco de dados
 	patient, err := controller.PatientSelectByIdRegister(patientId)
@@ -134,7 +133,7 @@ func ValidateLoginPatient(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(patientIdResponse)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusNotAcceptable)
+		w.WriteHeader(http.StatusUnauthorized)
 	}
 }
 

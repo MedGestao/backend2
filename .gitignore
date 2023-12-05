@@ -22,7 +22,7 @@ Thumbs.db
 *.swo
 
 # Ignorar arquivos de ambiente
-.env
+postgres-data
 
 # Ignorar arquivos de configuração específicos do usuário
 .bash_history

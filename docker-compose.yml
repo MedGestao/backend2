@@ -1,0 +1,33 @@
+version: '3.1'
+
+services:
+  db:
+    container_name: med-gestao-postgres
+    image: postgres
+    restart: always
+    ports:
+      - "5440:5432"
+    volumes: 
+      - postgres-data:/var/lib/postgresql/data
+      - ./db/med_gestao_backup.sql:/docker-entrypoint-initdb.d/init.sql
+    env_file:
+      - .env
+    networks:
+      - postgres-network
+
+  adminer:
+    container_name: med-gestao-adminer
+    image: adminer
+    restart: always
+    depends_on: 
+      - db
+    ports:
+      - 8080:8080
+    networks:
+      - postgres-network
+
+volumes:
+  postgres-data:
+
+networks: 
+  postgres-network:
