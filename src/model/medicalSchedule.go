@@ -1,22 +1,26 @@
 package model
 
+import "time"
+
 type MedicalSchedule struct {
 	id           int
 	doctorId     int
+	queryValue   float64
 	dayOfService string
-	specificTime string
+	specificDate time.Time
 	startTime    string
 	finalTime    string
 	year         string
 	active       bool
 }
 
-func NewMedicalSchedule(doctorId int, dayOfService string, specificTime string, startTime string,
+func NewMedicalSchedule(doctorId int, queryValue float64, dayOfService string, specificDate time.Time, startTime string,
 	finalTime string, year string) MedicalSchedule {
 	return MedicalSchedule{
 		doctorId:     doctorId,
+		queryValue:   queryValue,
 		dayOfService: dayOfService,
-		specificTime: specificTime,
+		specificDate: specificDate,
 		startTime:    startTime,
 		finalTime:    finalTime,
 		year:         year,
@@ -35,54 +39,62 @@ func (m MedicalSchedule) GetDoctorId() int {
 	return m.doctorId
 }
 
-func (a *MedicalSchedule) SetDoctorId(doctorId int) {
-	a.doctorId = doctorId
+func (m *MedicalSchedule) SetDoctorId(doctorId int) {
+	m.doctorId = doctorId
 }
 
-func (a MedicalSchedule) GetDayOfService() string {
-	return a.dayOfService
+func (m MedicalSchedule) GetQueryValue() float64 {
+	return m.queryValue
 }
 
-func (a *MedicalSchedule) SetDayOfService(dayOfService string) {
-	a.dayOfService = dayOfService
+func (m *MedicalSchedule) SetQueryValue(queryValue float64) {
+	m.queryValue = queryValue
 }
 
-func (a MedicalSchedule) GetSpecificTime() string {
-	return a.specificTime
+func (m MedicalSchedule) GetDayOfService() string {
+	return m.dayOfService
 }
 
-func (a *MedicalSchedule) SetSpecificTime(specificTime string) {
-	a.specificTime = specificTime
+func (m *MedicalSchedule) SetDayOfService(dayOfService string) {
+	m.dayOfService = dayOfService
 }
 
-func (a MedicalSchedule) GetStartTime() string {
-	return a.startTime
+func (m MedicalSchedule) GetSpecificDate() time.Time {
+	return m.specificDate
 }
 
-func (a *MedicalSchedule) SetStartTime(startTime string) {
-	a.startTime = startTime
+func (m *MedicalSchedule) SetSpecificTime(specificDate time.Time) {
+	m.specificDate = specificDate
 }
 
-func (a MedicalSchedule) GetFinalTime() string {
-	return a.finalTime
+func (m MedicalSchedule) GetStartTime() string {
+	return m.startTime
 }
 
-func (a *MedicalSchedule) SetFinalTime(finalTime string) {
-	a.finalTime = finalTime
+func (m *MedicalSchedule) SetStartTime(startTime string) {
+	m.startTime = startTime
 }
 
-func (a MedicalSchedule) GetYear() string {
-	return a.year
+func (m MedicalSchedule) GetFinalTime() string {
+	return m.finalTime
 }
 
-func (a *MedicalSchedule) SetYear(year string) {
-	a.year = year
+func (m *MedicalSchedule) SetFinalTime(finalTime string) {
+	m.finalTime = finalTime
 }
 
-func (a MedicalSchedule) IsActive() bool {
-	return a.active
+func (m MedicalSchedule) GetYear() string {
+	return m.year
 }
 
-func (a *MedicalSchedule) SetActive(active bool) {
-	a.active = active
+func (m *MedicalSchedule) SetYear(year string) {
+	m.year = year
+}
+
+func (m MedicalSchedule) IsActive() bool {
+	return m.active
+}
+
+func (m *MedicalSchedule) SetActive(active bool) {
+	m.active = active
 }

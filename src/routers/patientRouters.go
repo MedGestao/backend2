@@ -4,12 +4,11 @@ import (
 	"MedGestao/src/controller"
 	"MedGestao/src/request"
 	"MedGestao/src/response"
+	"MedGestao/src/util"
 	"encoding/json"
 	"net/http"
 	"time"
 )
-
-const DateFormat = "2006-01-02 15:04:05 -0700 MST"
 
 func CreatePatient(w http.ResponseWriter, r *http.Request) {
 	// Decodifica os dados JSON do corpo da solicitação
@@ -24,7 +23,7 @@ func CreatePatient(w http.ResponseWriter, r *http.Request) {
 	//birthDate, err := time.Parse("2006-01-02", "1992-07-05")
 	//patient.User.BirthDate = patient.User.BirthDate.Format(DateFormat)
 	var err error
-	patient.User.BirthDate, err = time.Parse(DateFormat, patient.User.BirthDate.String())
+	patient.User.BirthDate, err = time.Parse(util.DateFormat, patient.User.BirthDate.String())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

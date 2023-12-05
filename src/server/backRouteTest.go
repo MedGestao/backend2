@@ -26,6 +26,9 @@ func OpenServerTest() {
 	validadeDoctorLoginRouter := mux.NewRouter()
 	deactivateDoctorRouter := mux.NewRouter()
 
+	//MEDICAL SCHEDULE
+	createMedicalScheduleRouter := mux.NewRouter()
+
 	// Configuração do CORS
 	//c := cors.AllowAll()
 
@@ -80,9 +83,13 @@ func OpenServerTest() {
 	// Lide com solicitações selectByIdPatient com o middleware CORS
 	muxRouter.Handle("/api/deactivateDoctor", c.Handler(deactivateDoctorRouter))
 
+	//MEDICAL SCHEDULE ROUTE
+	createMedicalScheduleRouter.HandleFunc("/api/createMedicalSchedule", routers.CreateMedicalSchedule)
+	muxRouter.Handle("/api/createMedicalSchedule", c.Handler(createMedicalScheduleRouter))
+
 	// Inicialize o servidor na porta desejada
 	//http.Handle("/", c.Handler(createPatientRouter))
 	//http.Handle("/editRequestPatient", c.Handler(selectByIdPatientRouter))
-	println("Servidor ligado porta :3001!")
+	println("Servidor ligado na porta :3001!")
 	log.Fatal(http.ListenAndServe(":3001", muxRouter))
 }

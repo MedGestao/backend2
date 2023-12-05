@@ -3,16 +3,21 @@ package controller
 import (
 	"MedGestao/src/dao"
 	"MedGestao/src/model"
+	"MedGestao/src/request"
 )
 
-func RegisterMedicalSchedule(medicalSchedule model.MedicalSchedule) (bool, error) {
+func RegisterMedicalSchedule(medicalScheduleRequest request.MedicalScheduleRequest) (bool, error) {
 	var success bool
 	var err error
 
-	if medicalSchedule == (model.MedicalSchedule{}) {
+	if medicalScheduleRequest == (request.MedicalScheduleRequest{}) {
 		println("Nenhum dado recebido")
 		return success, err
 	}
+
+	medicalSchedule := model.NewMedicalSchedule(medicalScheduleRequest.DoctorId.Id, medicalScheduleRequest.QueryValue,
+		medicalScheduleRequest.DayOfService, medicalScheduleRequest.SpecificDate, medicalScheduleRequest.StartTime,
+		medicalScheduleRequest.FinalTime, medicalScheduleRequest.Year)
 
 	success, err = dao.MedicalScheduleInsert(medicalSchedule)
 	if err != nil {

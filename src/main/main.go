@@ -169,7 +169,7 @@ func main() {
 	//CONFIGURAR AGENDA DO MÉDICO
 
 	//Inserir Agenda
-	//medicalSchedule := model.NewMedicalSchedule(7, "03", "", "09:00", "17:00",
+	//medicalSchedule := model.NewMedicalSchedule(10, 220.00, "03", "", "8:30", "16:00",
 	//	"2023")
 	//success, err := controller.RegisterMedicalSchedule(medicalSchedule)
 	//if err != nil {
@@ -186,19 +186,20 @@ func main() {
 	//medicalScheduleList, err := controller.SearchAllMedicalSchedule()
 	//if err != nil {
 	//	println("Excessão lançada. Erro gerado:", err.Error())
-	//}else {
+	//} else {
 	//	for i, medicalSchedule := range medicalScheduleList {
 	//		println("Agenda", i+1)
 	//		println("Horário inicial do atendimento:", medicalSchedule.GetStartTime())
 	//		println("Horário final do atendimento:", medicalSchedule.GetFinalTime())
 	//		println("Dia de serviço:", medicalSchedule.GetDayOfService())
 	//		println("Ano do atendimento:", medicalSchedule.GetYear())
+	//		println("Valor da consulta: R$",fmt.Sprintf("%.2f", medicalSchedule.GetQueryValue()))
 	//		println("")
 	//	}
 	//}
 
 	//Buscar agenda pelo id
-	//medicalSchedule, err := controller.SearchByIdMedicalSchedule(1)
+	//medicalSchedule, err := controller.SearchByIdMedicalSchedule(6)
 	//if err != nil {
 	//	println("Excessão lançada. Error gerado:", err.Error())
 	//} else if medicalSchedule == (model.MedicalSchedule{}) {
@@ -209,12 +210,16 @@ func main() {
 	//	println("Horário final do atendimento:", medicalSchedule.GetFinalTime())
 	//	println("Dia de serviço:", medicalSchedule.GetDayOfService())
 	//	println("Ano do atendimento:", medicalSchedule.GetYear())
+	//	println("Valor da consulta:  R$", fmt.Sprintf("%.2f", medicalSchedule.GetQueryValue()))
+	//	if !medicalSchedule.GetSpecificDate().IsZero() {
+	//		println("Data especifíca:", medicalSchedule.GetSpecificDate().String())
+	//	}
 	//}
 
 	//Editar agenda
-	//medicalSchedule := model.NewMedicalSchedule(7, "05", "", "08:00", "15:00",
+	//medicalSchedule := model.NewMedicalSchedule(10, 229.90, "03", "", "8:30", "16:00",
 	//	"2023")
-	//medicalSchedule.SetId(2)
+	//medicalSchedule.SetId(5)
 	//success, err := controller.EditMedicalSchedule(medicalSchedule)
 	//if err != nil {
 	//	println("Excessão lançada. Erro gerado:", err.Error())

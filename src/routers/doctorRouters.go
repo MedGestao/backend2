@@ -4,6 +4,7 @@ import (
 	"MedGestao/src/controller"
 	"MedGestao/src/request"
 	"MedGestao/src/response"
+	"MedGestao/src/util"
 	"encoding/json"
 	"net/http"
 	"time"
@@ -18,7 +19,7 @@ func CreateDoctor(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var err error
-	doctor.User.BirthDate, err = time.Parse(DateFormat, doctor.User.BirthDate.String())
+	doctor.User.BirthDate, err = time.Parse(util.DateFormat, doctor.User.BirthDate.String())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
