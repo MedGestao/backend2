@@ -16,15 +16,15 @@ type DoctorRequest struct {
 }
 
 type DoctorIdRequest struct {
-	Id int `json:"idDoctorSelectRequest"`
+	Id int `json:"id"`
 }
 
-type EditDoctorRequest struct {
-	DoctorIdRequest DoctorIdRequest `json:"doctorEditIdRequest"`
-	DoctorRequest   DoctorRequest   `json:"doctorEditRequest"`
-}
+//type EditDoctorRequest struct {
+//	DoctorIdRequest DoctorIdRequest `json:"doctorEditIdRequest"`
+//	DoctorRequest   DoctorRequest   `json:"doctorEditRequest"`
+//}
 
 type DoctorAuthenticatorRequest struct {
-	Email    string `json:"emailAuthenticatorRequest"`
-	Password string `json:"passwordAuthenticatorRequest"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }

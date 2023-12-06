@@ -7,8 +7,8 @@ type MedicalScheduleRequest struct {
 	QueryValue   float64         `json:"queryValue"`
 	DayOfService string          `json:"dayOfService"`
 	SpecificDate time.Time       `json:"specificDate"`
-	StartTime    string          `json:"startTime"`
-	FinalTime    string          `json:"finalTime"`
+	Period1      string          `json:"period1"`
+	Period2      string          `json:"period2"`
 	Year         string          `json:"year"`
 }
 
@@ -16,7 +16,7 @@ type MedicalScheduleIdRequest struct {
 	Id int `json:"idMedicalScheduleSelectRequest"`
 }
 
-type EditMedicalScheduleRequest struct {
-	MedicalScheduleIdRequest MedicalScheduleIdRequest `json:"editMedicalScheduleIdRequest"`
-	MedicalScheduleRequest   MedicalScheduleRequest   `json:"editMedicalScheduleRequest"`
-}
+//type EditMedicalScheduleRequest struct {
+//	MedicalScheduleIdRequest MedicalScheduleIdRequest `json:"editMedicalScheduleIdRequest"`
+//	MedicalScheduleRequest   MedicalScheduleRequest   `json:"editMedicalScheduleRequest"`
+//}

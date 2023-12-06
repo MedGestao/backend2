@@ -11,5 +11,5 @@ type DoctorResponse struct {
 }
 
 type DoctorIdResponse struct {
-	Id int `json:"idDoctorSelectResponse"`
+	Id int `json:"id"`
 }

@@ -8,8 +8,8 @@ type MedicalSchedule struct {
 	queryValue   float64
 	dayOfService string
 	specificDate time.Time
-	startTime    string
-	finalTime    string
+	period1      string
+	period2      string
 	year         string
 	active       bool
 }
@@ -21,8 +21,8 @@ func NewMedicalSchedule(doctorId int, queryValue float64, dayOfService string, s
 		queryValue:   queryValue,
 		dayOfService: dayOfService,
 		specificDate: specificDate,
-		startTime:    startTime,
-		finalTime:    finalTime,
+		period1:      startTime,
+		period2:      finalTime,
 		year:         year,
 	}
 }
@@ -67,20 +67,20 @@ func (m *MedicalSchedule) SetSpecificTime(specificDate time.Time) {
 	m.specificDate = specificDate
 }
 
-func (m MedicalSchedule) GetStartTime() string {
-	return m.startTime
+func (m MedicalSchedule) GetPeriod1() string {
+	return m.period1
 }
 
-func (m *MedicalSchedule) SetStartTime(startTime string) {
-	m.startTime = startTime
+func (m *MedicalSchedule) SetPeriod1(period1 string) {
+	m.period1 = period1
 }
 
-func (m MedicalSchedule) GetFinalTime() string {
-	return m.finalTime
+func (m MedicalSchedule) GetPeriod2() string {
+	return m.period2
 }
 
-func (m *MedicalSchedule) SetFinalTime(finalTime string) {
-	m.finalTime = finalTime
+func (m *MedicalSchedule) SetPeriod2(period2 string) {
+	m.period2 = period2
 }
 
 func (m MedicalSchedule) GetYear() string {

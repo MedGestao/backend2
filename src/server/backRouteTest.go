@@ -34,7 +34,7 @@ func OpenServerTest() {
 
 	router.HandleFunc("/api/patients/login", routers.ValidateLoginPatient).Methods(http.MethodPost)
 
-	router.HandleFunc("/api/patients/{id}/deactivate", routers.DeactivatePatient).Methods(http.MethodPost)
+	router.HandleFunc("/api/patients/deactivate", routers.DeactivatePatient).Methods(http.MethodPost)
 
 	//DOCTOR ROUTERS
 	router.HandleFunc("/api/doctors", routers.CreateDoctor).Methods(http.MethodPost)
@@ -47,12 +47,21 @@ func OpenServerTest() {
 
 	router.HandleFunc("/api/doctors/deactivate", routers.DeactivateDoctor).Methods(http.MethodPost)
 
+	//MEDICAL SCHEDULE ROUTERS
+	router.HandleFunc("/api/medicalSchedule", routers.CreateMedicalSchedule).Methods(http.MethodPost)
+
+	router.HandleFunc("/api/medicalSchedule/listSchedules/{id}", routers.GetMedicalScheduleAllByIdDoctor).Methods(http.MethodGet)
+
+	router.HandleFunc("/api/medicalSchedule/{id}", routers.GetMedicalScheduleById).Methods(http.MethodGet)
+
+	router.HandleFunc("/api/medicalSchedule/{id}", routers.EditMedicalSchedule).Methods(http.MethodPut)
+
 	// Inicialize o servidor na porta desejada
 	//http.Handle("/", c.Handler(createPatientRouter))
 	//http.Handle("/editRequestPatient", c.Handler(selectByIdPatientRouter))
 
 	handler := c.Handler(router)
 
-	println("Servidor ligado porta :3001!")
+	println("Servidor ligado na porta :3001!")
 	log.Fatal(http.ListenAndServe(":3001", handler))
 }

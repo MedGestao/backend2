@@ -85,14 +85,20 @@ func GetPatientById(w http.ResponseWriter, r *http.Request) {
 }
 
 func EditPatient(w http.ResponseWriter, r *http.Request) {
-	var dataRequest request.EditPatientRequest
+	params := mux.Vars(r)
+	id := params["id"]
+	var patientEditRequest request.PatientRequest
 	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&dataRequest); err != nil {
+	if err := decoder.Decode(&patientEditRequest); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
-	patientIdRequest := dataRequest.PatientIdRequest
-	patientEditRequest := dataRequest.PatientRequest
+	patientIdRequest, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	//patientEditRequest := dataRequest.PatientRequest
 
 	success, err := controller.PatientRegisterEdit(patientIdRequest, patientEditRequest)
 	if err != nil {

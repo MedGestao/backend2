@@ -189,8 +189,8 @@ func main() {
 	//} else {
 	//	for i, medicalSchedule := range medicalScheduleList {
 	//		println("Agenda", i+1)
-	//		println("Horário inicial do atendimento:", medicalSchedule.GetStartTime())
-	//		println("Horário final do atendimento:", medicalSchedule.GetFinalTime())
+	//		println("Horário inicial do atendimento:", medicalSchedule.GetPeriod1())
+	//		println("Horário final do atendimento:", medicalSchedule.GetPeriod2())
 	//		println("Dia de serviço:", medicalSchedule.GetDayOfService())
 	//		println("Ano do atendimento:", medicalSchedule.GetYear())
 	//		println("Valor da consulta: R$",fmt.Sprintf("%.2f", medicalSchedule.GetQueryValue()))
@@ -206,8 +206,8 @@ func main() {
 	//	println("Agenda não encontrada!")
 	//} else {
 	//	println("Agenda")
-	//	println("Horário inicial do atendimento:", medicalSchedule.GetStartTime())
-	//	println("Horário final do atendimento:", medicalSchedule.GetFinalTime())
+	//	println("Horário inicial do atendimento:", medicalSchedule.GetPeriod1())
+	//	println("Horário final do atendimento:", medicalSchedule.GetPeriod2())
 	//	println("Dia de serviço:", medicalSchedule.GetDayOfService())
 	//	println("Ano do atendimento:", medicalSchedule.GetYear())
 	//	println("Valor da consulta:  R$", fmt.Sprintf("%.2f", medicalSchedule.GetQueryValue()))

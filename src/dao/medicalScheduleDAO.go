@@ -17,33 +17,56 @@ func MedicalScheduleInsert(medicalSchedule model.MedicalSchedule) (bool, error) 
 	}
 	defer db.Close()
 
-	sql := "insert into medical_schedule(doctor_id, day_of_service, start_time, final_time, specific_date, year, active, " +
-		"registration_date, query_value) values($1, $2, $3, $4, $5, $6, true, current_timestamp, $7)"
-	if err != err {
-		return success, err
-	}
-	_, err = db.Prepare(sql)
-	if err != nil {
-		return success, err
-	}
+	if medicalSchedule.GetSpecificDate().IsZero() {
+		sql := "insert into medical_schedule(doctor_id, day_of_service, period_1, period_2, year, active, " +
+			"registration_date, query_value) values($1, $2, $3, $4, $5, true, current_timestamp, $6)"
+		if err != err {
+			return success, err
+		}
+		_, err = db.Prepare(sql)
+		if err != nil {
+			return success, err
+		}
 
-	_, err = db.Exec(sql,
-		medicalSchedule.GetDoctorId(),
-		medicalSchedule.GetDayOfService(),
-		medicalSchedule.GetStartTime(),
-		medicalSchedule.GetFinalTime(),
-		medicalSchedule.GetSpecificDate(),
-		medicalSchedule.GetYear(),
-		medicalSchedule.GetQueryValue())
-	if err != nil {
-		return success, err
+		_, err = db.Exec(sql,
+			medicalSchedule.GetDoctorId(),
+			medicalSchedule.GetDayOfService(),
+			medicalSchedule.GetPeriod1(),
+			medicalSchedule.GetPeriod2(),
+			medicalSchedule.GetYear(),
+			medicalSchedule.GetQueryValue())
+		if err != nil {
+			return success, err
+		}
+	} else {
+		sql := "insert into medical_schedule(doctor_id, day_of_service, period_1, period_2, specific_date, year, active, " +
+			"registration_date, query_value) values($1, $2, $3, $4, $5, $6, true, current_timestamp, $7)"
+		if err != err {
+			return success, err
+		}
+		_, err = db.Prepare(sql)
+		if err != nil {
+			return success, err
+		}
+
+		_, err = db.Exec(sql,
+			medicalSchedule.GetDoctorId(),
+			medicalSchedule.GetDayOfService(),
+			medicalSchedule.GetPeriod1(),
+			medicalSchedule.GetPeriod2(),
+			medicalSchedule.GetSpecificDate(),
+			medicalSchedule.GetYear(),
+			medicalSchedule.GetQueryValue())
+		if err != nil {
+			return success, err
+		}
 	}
 
 	success = true
 	return success, err
 }
 
-func MedicalScheduleSelectAll() ([]model.MedicalSchedule, error) {
+func MedicalScheduleSelectAllByIdDoctor(doctorId int) ([]model.MedicalSchedule, error) {
 	var medicalSchedule model.MedicalSchedule
 	var medicalScheduleList []model.MedicalSchedule
 	db, err := connection.NewConnection()
@@ -51,25 +74,27 @@ func MedicalScheduleSelectAll() ([]model.MedicalSchedule, error) {
 		return medicalScheduleList, err
 	}
 	defer db.Close()
-	sql := "select id, doctor_id, day_of_service, start_time, final_time, specific_date, year, query_value from medical_schedule where active is true"
+	sql := "select id, doctor_id, day_of_service, period_1, period_2, specific_date, year, query_value from medical_schedule where doctor_id = $1 and active is true"
 
 	_, err = db.Prepare(sql)
 	if err != nil {
 		return medicalScheduleList, err
 	}
 
-	rows, err := db.Query(sql)
+	rows, err := db.Query(sql,
+		doctorId)
 	if err != nil {
 		return medicalScheduleList, err
 	}
 
 	var idDB, doctorIdDB int
-	var dayOfServiceDB, startTimeDB, finalTimeDB, yearDB string
+	var dayOfServiceDB, period1DB, period2DB, yearDB string
 	var specificDateDB time.Time
 	var queryValueDB float64
 	var strValue string
+	var specificDateNull sql2.NullTime
 	for rows.Next() {
-		err = rows.Scan(&idDB, &doctorIdDB, &dayOfServiceDB, &startTimeDB, &finalTimeDB, &specificDateDB, &yearDB, &strValue)
+		err = rows.Scan(&idDB, &doctorIdDB, &dayOfServiceDB, &period1DB, &period2DB, &specificDateNull, &yearDB, &strValue)
 		if err != nil {
 			return medicalScheduleList, err
 		}
@@ -79,10 +104,20 @@ func MedicalScheduleSelectAll() ([]model.MedicalSchedule, error) {
 		if err != nil {
 			return medicalScheduleList, err
 		}
-		medicalSchedule = model.NewMedicalSchedule(doctorIdDB, queryValueDB, dayOfServiceDB, specificDateDB, startTimeDB, finalTimeDB, yearDB)
-		if medicalSchedule != (model.MedicalSchedule{}) {
-			medicalSchedule.SetId(idDB)
-			medicalScheduleList = append(medicalScheduleList, medicalSchedule)
+
+		if specificDateNull.Valid {
+			specificDateDB = specificDateNull.Time
+			medicalSchedule = model.NewMedicalSchedule(doctorIdDB, queryValueDB, dayOfServiceDB, specificDateDB, period1DB, period2DB, yearDB)
+			if medicalSchedule != (model.MedicalSchedule{}) {
+				medicalSchedule.SetId(idDB)
+				medicalScheduleList = append(medicalScheduleList, medicalSchedule)
+			}
+		} else {
+			medicalSchedule = model.NewMedicalSchedule(doctorIdDB, queryValueDB, dayOfServiceDB, time.Time{}, period1DB, period2DB, yearDB)
+			if medicalSchedule != (model.MedicalSchedule{}) {
+				medicalSchedule.SetId(idDB)
+				medicalScheduleList = append(medicalScheduleList, medicalSchedule)
+			}
 		}
 	}
 
@@ -97,7 +132,7 @@ func MedicalScheduleSelectById(medicalScheduleId int) (model.MedicalSchedule, er
 	}
 	defer db.Close()
 
-	sql := "select doctor_id, day_of_service, start_time, final_time, specific_date, year, query_value from medical_schedule " +
+	sql := "select doctor_id, day_of_service, period_1, period_2, specific_date, year, query_value from medical_schedule " +
 		"where id = $1 and active is true"
 	_, err = db.Prepare(sql)
 	if err != nil {
@@ -110,13 +145,13 @@ func MedicalScheduleSelectById(medicalScheduleId int) (model.MedicalSchedule, er
 	}
 
 	var doctorIdDB int
-	var dayOfServiceDB, startTimeDB, finalTimeDB, yearDB string
+	var dayOfServiceDB, period1DB, period2DB, yearDB string
 	var specificDateDB time.Time
 	var queryValueDB float64
 	var strValue string
 	var specificDateNull sql2.NullTime
 	for rows.Next() {
-		err = rows.Scan(&doctorIdDB, &dayOfServiceDB, &startTimeDB, &finalTimeDB, &specificDateNull, &yearDB, &strValue)
+		err = rows.Scan(&doctorIdDB, &dayOfServiceDB, &period1DB, &period2DB, &specificDateNull, &yearDB, &strValue)
 		if err != nil {
 			return medicalSchedule, err
 		}
@@ -130,9 +165,9 @@ func MedicalScheduleSelectById(medicalScheduleId int) (model.MedicalSchedule, er
 
 	if specificDateNull.Valid {
 		specificDateDB = specificDateNull.Time
-		medicalSchedule = model.NewMedicalSchedule(doctorIdDB, queryValueDB, dayOfServiceDB, specificDateDB, startTimeDB, finalTimeDB, yearDB)
+		medicalSchedule = model.NewMedicalSchedule(doctorIdDB, queryValueDB, dayOfServiceDB, specificDateDB, period1DB, period2DB, yearDB)
 	} else {
-		medicalSchedule = model.NewMedicalSchedule(doctorIdDB, queryValueDB, dayOfServiceDB, time.Time{}, startTimeDB, finalTimeDB, yearDB)
+		medicalSchedule = model.NewMedicalSchedule(doctorIdDB, queryValueDB, dayOfServiceDB, time.Time{}, period1DB, period2DB, yearDB)
 	}
 	if medicalSchedule != (model.MedicalSchedule{}) {
 		medicalSchedule.SetId(medicalScheduleId)
@@ -149,25 +184,47 @@ func MedicalScheduleEdit(medicalSchedule model.MedicalSchedule) (bool, error) {
 	}
 	defer db.Close()
 
-	sql := "update medical_schedule set doctor_id=$1, day_of_service=$2, start_time=$3, final_time=$4, specific_date=$5, " +
-		"year=$6, active=true, last_modified_date=current_timestamp, query_value=$7 where id=$8"
+	if medicalSchedule.GetSpecificDate().IsZero() {
+		sql := "update medical_schedule set doctor_id=$1, day_of_service=$2, period_1=$3, period_2=$4, " +
+			"year=$5, active=true, last_modified_date=current_timestamp, query_value=$6 where id=$7"
 
-	_, err = db.Prepare(sql)
-	if err != nil {
-		return success, err
-	}
+		_, err = db.Prepare(sql)
+		if err != nil {
+			return success, err
+		}
 
-	_, err = db.Exec(sql,
-		medicalSchedule.GetDoctorId(),
-		medicalSchedule.GetDayOfService(),
-		medicalSchedule.GetStartTime(),
-		medicalSchedule.GetFinalTime(),
-		medicalSchedule.GetSpecificDate(),
-		medicalSchedule.GetYear(),
-		medicalSchedule.GetQueryValue(),
-		medicalSchedule.GetId())
-	if err != nil {
-		return success, err
+		_, err = db.Exec(sql,
+			medicalSchedule.GetDoctorId(),
+			medicalSchedule.GetDayOfService(),
+			medicalSchedule.GetPeriod1(),
+			medicalSchedule.GetPeriod2(),
+			medicalSchedule.GetYear(),
+			medicalSchedule.GetQueryValue(),
+			medicalSchedule.GetId())
+		if err != nil {
+			return success, err
+		}
+	} else {
+		sql := "update medical_schedule set doctor_id=$1, day_of_service=$2, period_1=$3, period_2=$4, specific_date=$5, " +
+			"year=$6, active=true, last_modified_date=current_timestamp, query_value=$7 where id=$8"
+
+		_, err = db.Prepare(sql)
+		if err != nil {
+			return success, err
+		}
+
+		_, err = db.Exec(sql,
+			medicalSchedule.GetDoctorId(),
+			medicalSchedule.GetDayOfService(),
+			medicalSchedule.GetPeriod1(),
+			medicalSchedule.GetPeriod2(),
+			medicalSchedule.GetSpecificDate(),
+			medicalSchedule.GetYear(),
+			medicalSchedule.GetQueryValue(),
+			medicalSchedule.GetId())
+		if err != nil {
+			return success, err
+		}
 	}
 
 	success = true

@@ -3,17 +3,17 @@ package response
 import "time"
 
 type CellphoneResponse struct {
-	Number string `json:"numberResponse"`
+	Number string `json:"number"`
 }
 
 type UserResponse struct {
-	Name          string            `json:"nameResponse"`
-	BirthDate     time.Time         `json:"birthDateResponse"`
-	Cpf           string            `json:"cpfResponse"`
-	Sex           string            `json:"sexResponse"`
-	Address       string            `json:"addressResponse"`
-	Email         string            `json:"emailResponse"`
-	Password      string            `json:"passwordResponse"`
-	ImageUrl      string            `json:"imageUrlResponse"`
-	CellphoneUser CellphoneResponse `json:"cellphoneUserResponse"`
+	Name          string            `json:"name"`
+	BirthDate     time.Time         `json:"birthDate"`
+	Cpf           string            `json:"cpf"`
+	Sex           string            `json:"sex"`
+	Address       string            `json:"address"`
+	Email         string            `json:"email"`
+	Password      string            `json:"password"`
+	ImageUrl      string            `json:"imageUrl"`
+	CellphoneUser CellphoneResponse `json:"cellphoneUser"`
 }
