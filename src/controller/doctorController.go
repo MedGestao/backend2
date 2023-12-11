@@ -7,12 +7,13 @@ import (
 	"MedGestao/src/response"
 )
 
-func DoctorRegister(doctorRequest request.DoctorRequest) (bool, error) {
+func DoctorRegister(doctorRequest request.DoctorRequest) (int, error, response.ErrorResponse) {
 
-	var success bool
+	var doctorId int
 	var err error
+	var errorMessage response.ErrorResponse
 	if doctorRequest.User.Name == "" {
-		return success, err
+		return doctorId, err, errorMessage
 	}
 
 	cellPhoneUser := model.NewCellphoneUser(doctorRequest.User.CellphoneUser.Number)
@@ -22,12 +23,12 @@ func DoctorRegister(doctorRequest request.DoctorRequest) (bool, error) {
 		doctorRequest.User.Sex, doctorRequest.User.Address, doctorRequest.User.Email, cellPhoneUser, doctorRequest.User.Password,
 		doctorRequest.User.ImageUrl, doctorRequest.Crm, specialty)
 
-	success, err = dao.InsertDoctor(doctor)
+	doctorId, err, errorMessage = dao.InsertDoctor(doctor)
 	if err != nil {
-		return success, err
+		return doctorId, err, errorMessage
 	}
 
-	return success, err
+	return doctorId, err, errorMessage
 }
 
 func DoctorAuthenticatorLogin(email string, password string) (bool, int, error) {
@@ -83,13 +84,13 @@ func DoctorSelectRegisterById(doctorId int) (response.DoctorResponse, error) {
 	return doctor, err
 }
 
-func DoctorRegisterEdit(idDoctorRequest request.DoctorIdRequest, doctorRequest request.DoctorRequest) (bool, error) {
+func DoctorRegisterEdit(idDoctorRequest int, doctorRequest request.DoctorRequest) (bool, error) {
 
 	var success bool
 	var err error
 
 	//Adicionar essas condições depois: || patient == nil || patient.User == nil no lugar da que está comparando o nome
-	if idDoctorRequest.Id == 0 || doctorRequest.User.Name == "" {
+	if idDoctorRequest == 0 || doctorRequest.User.Name == "" {
 		return success, err
 	}
 
@@ -100,7 +101,7 @@ func DoctorRegisterEdit(idDoctorRequest request.DoctorIdRequest, doctorRequest r
 		doctorRequest.User.Sex, doctorRequest.User.Address, doctorRequest.User.Email, cellPhoneUser, doctorRequest.User.Password,
 		doctorRequest.User.ImageUrl, doctorRequest.Crm, specialty)
 
-	success, err = dao.DoctorEdit(idDoctorRequest.Id, doctor)
+	success, err = dao.DoctorEdit(idDoctorRequest, doctor)
 	if err != nil {
 		return success, err
 	}

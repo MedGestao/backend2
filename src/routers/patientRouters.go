@@ -4,6 +4,7 @@ import (
 	"MedGestao/src/controller"
 	"MedGestao/src/request"
 	"MedGestao/src/response"
+	"MedGestao/src/util"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -11,8 +12,6 @@ import (
 
 	"github.com/gorilla/mux"
 )
-
-const DateFormat = "2006-01-02 15:04:05 -0700 MST"
 
 func CreatePatient(w http.ResponseWriter, r *http.Request) {
 	// Decodifica os dados JSON do corpo da solicitação
@@ -27,7 +26,7 @@ func CreatePatient(w http.ResponseWriter, r *http.Request) {
 	//birthDate, err := time.Parse("2006-01-02", "1992-07-05")
 	//patient.User.BirthDate = patient.User.BirthDate.Format(DateFormat)
 	var err error
-	patient.User.BirthDate, err = time.Parse(DateFormat, patient.User.BirthDate.String())
+	patient.User.BirthDate, err = time.Parse(util.DateFormat, patient.User.BirthDate.String())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -86,14 +85,20 @@ func GetPatientById(w http.ResponseWriter, r *http.Request) {
 }
 
 func EditPatient(w http.ResponseWriter, r *http.Request) {
-	var dataRequest request.EditPatientRequest
+	params := mux.Vars(r)
+	id := params["id"]
+	var patientEditRequest request.PatientRequest
 	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&dataRequest); err != nil {
+	if err := decoder.Decode(&patientEditRequest); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
-	patientIdRequest := dataRequest.PatientIdRequest
-	patientEditRequest := dataRequest.PatientRequest
+	patientIdRequest, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	//patientEditRequest := dataRequest.PatientRequest
 
 	success, err := controller.PatientRegisterEdit(patientIdRequest, patientEditRequest)
 	if err != nil {

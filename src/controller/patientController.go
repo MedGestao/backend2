@@ -29,13 +29,13 @@ func PatientRegister(patientRequest request.PatientRequest) (bool, error) {
 	return success, err
 }
 
-func PatientRegisterEdit(idPatientRequest request.PatientIdRequest, patientRequest request.PatientRequest) (bool, error) {
+func PatientRegisterEdit(idPatientRequest int, patientRequest request.PatientRequest) (bool, error) {
 
 	var success bool
 	var err error
 
 	//Adicionar essas condições depois: || patient == nil || patient.User == nil no lugar da que está comparando o nome
-	if idPatientRequest.Id == 0 || patientRequest.User.Name == "" {
+	if idPatientRequest == 0 || patientRequest.User.Name == "" {
 		return success, err
 	}
 
@@ -46,7 +46,7 @@ func PatientRegisterEdit(idPatientRequest request.PatientIdRequest, patientReque
 		patientRequest.User.Sex, patientRequest.User.Address, patientRequest.User.Email, patientRequest.User.Password,
 		patientRequest.User.ImageUrl, cellPhoneUser)
 
-	success, err = dao.PatientEdit(idPatientRequest.Id, patient)
+	success, err = dao.PatientEdit(idPatientRequest, patient)
 	if err != nil {
 		return success, err
 	}

@@ -4,6 +4,7 @@ import (
 	"MedGestao/src/controller"
 	"MedGestao/src/request"
 	"MedGestao/src/response"
+	"MedGestao/src/util"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -21,27 +22,39 @@ func CreateDoctor(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var err error
-	doctor.User.BirthDate, err = time.Parse(DateFormat, doctor.User.BirthDate.String())
+	doctor.User.BirthDate, err = time.Parse(util.DateFormat, doctor.User.BirthDate.String())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	success, err := controller.DoctorRegister(doctor)
+	doctorId, err, errorMessage := controller.DoctorRegister(doctor)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	if success == true {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode("Médico cadastrado com sucesso!")
-	} else {
+	if errorMessage.Message != "" {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response.NewErrorResponse("Não foi possível cadastrar o médico!"))
+		json.NewEncoder(w).Encode(errorMessage.Message)
+	} else {
+		doctorIdResponse := response.DoctorIdResponse{Id: doctorId}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(doctorIdResponse)
 	}
+
+	//if doctorId != 0 {
+	//	doctorIdResponse := response.DoctorIdResponse{Id: doctorId}
+	//	w.Header().Set("Content-Type", "application/json")
+	//	w.WriteHeader(http.StatusCreated)
+	//	json.NewEncoder(w).Encode(doctorIdResponse)
+	//} else {
+	//	w.Header().Set("Content-Type", "application/json")
+	//	w.WriteHeader(http.StatusBadRequest)
+	//	json.NewEncoder(w).Encode(response.NewErrorResponse("Não foi possível cadastrar o médico!"))
+	//}
 }
 
 func GetDoctorById(w http.ResponseWriter, r *http.Request) {
@@ -73,14 +86,20 @@ func GetDoctorById(w http.ResponseWriter, r *http.Request) {
 }
 
 func EditDoctor(w http.ResponseWriter, r *http.Request) {
-	var dataRequest request.EditDoctorRequest
+	params := mux.Vars(r)
+	id := params["id"]
+	var doctorEditRequest request.DoctorRequest
 	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&dataRequest); err != nil {
+	if err := decoder.Decode(&doctorEditRequest); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
-	doctorIdRequest := dataRequest.DoctorIdRequest
-	doctorEditRequest := dataRequest.DoctorRequest
+	doctorIdRequest, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	//doctorEditRequest := dataRequest.DoctorRequest
 
 	success, err := controller.DoctorRegisterEdit(doctorIdRequest, doctorEditRequest)
 	if err != nil {
@@ -109,13 +128,13 @@ func ValidateLoginDoctor(w http.ResponseWriter, r *http.Request) {
 	doctorEmail := validateLogin.Email
 	doctorPassword := validateLogin.Password
 
-	authorized, patientId, err := controller.DoctorAuthenticatorLogin(doctorEmail, doctorPassword)
+	authorized, doctorId, err := controller.DoctorAuthenticatorLogin(doctorEmail, doctorPassword)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
 	if authorized == true {
-		doctorIdResponse := response.DoctorIdResponse{Id: patientId}
+		doctorIdResponse := response.DoctorIdResponse{Id: doctorId}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(doctorIdResponse)

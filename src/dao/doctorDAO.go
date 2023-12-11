@@ -3,24 +3,26 @@ package dao
 import (
 	"MedGestao/src/connection"
 	"MedGestao/src/model"
+	"MedGestao/src/response"
 	"MedGestao/src/util"
 	"database/sql"
 	"time"
 )
 
-func InsertDoctor(doctor model.Doctor) (bool, error) {
-	var success bool
+func InsertDoctor(doctor model.Doctor) (int, error, response.ErrorResponse) {
+	var doctorId int
 	var err error
+	var errorMessage response.ErrorResponse
 	db, err := connection.NewConnection()
 	defer db.Close()
 	if err != nil {
-		return success, err
+		return doctorId, err, errorMessage
 	}
 
 	tx, err := db.Begin()
 	if err != nil {
 		println(err)
-		return success, err
+		return doctorId, err, errorMessage
 	}
 
 	sql := "insert into doctor(name, birthdate, cpf, sex, address, crm, image_url, active, registration_date)" +
@@ -29,12 +31,12 @@ func InsertDoctor(doctor model.Doctor) (bool, error) {
 	if err != nil {
 		tx.Rollback()
 		println("Error1: ", err.Error())
-		return success, err
+		return doctorId, err, errorMessage
 	}
 
 	if err != nil {
 		println("Error geração do hash do password: ", err.Error())
-		return success, err
+		return doctorId, err, errorMessage
 	}
 
 	var tempDoctorId int
@@ -51,7 +53,7 @@ func InsertDoctor(doctor model.Doctor) (bool, error) {
 	if err != nil {
 		tx.Rollback()
 		println("Error2: ", err.Error())
-		return success, err
+		return doctorId, err, errorMessage
 	}
 
 	sql = "insert into cellphone_doctor(doctor_id, number) values ($1, $2)"
@@ -60,7 +62,7 @@ func InsertDoctor(doctor model.Doctor) (bool, error) {
 		tx.Rollback()
 		println("Id do médico: ", tempDoctorId)
 		println("Error3: ", err.Error())
-		return success, err
+		return doctorId, err, errorMessage
 	}
 	_, err = tx.Exec(sql,
 		tempDoctorId,
@@ -70,14 +72,14 @@ func InsertDoctor(doctor model.Doctor) (bool, error) {
 		tx.Rollback()
 		println("Id do médico: ", tempDoctorId)
 		println("Error4: ", err.Error())
-		return success, err
+		return doctorId, err, errorMessage
 	}
 
 	sql = "insert into medical_specialty(doctor_id, specialty_id) values($1, $2)"
 	_, err = tx.Prepare(sql)
 	if err != nil {
 		println("Error5: ", err.Error())
-		return success, err
+		return doctorId, err, errorMessage
 	}
 
 	_, err = tx.Exec(sql,
@@ -87,7 +89,26 @@ func InsertDoctor(doctor model.Doctor) (bool, error) {
 	)
 	if err != nil {
 		println("Error6: ", err.Error())
-		return success, err
+		return doctorId, err, errorMessage
+	}
+
+	sql = "select exists (select id from doctor_authentication_information where doctor_email=$1) as ex"
+	_, err = tx.Prepare(sql)
+	if err != nil {
+		tx.Rollback()
+		return doctorId, err, errorMessage
+	}
+
+	var exists bool
+	err = tx.QueryRow(sql,
+		doctor.GetUser().GetEmail()).Scan(&exists)
+	if err != nil {
+		tx.Rollback()
+		return doctorId, err, errorMessage
+	} else if exists == true {
+		tx.Rollback()
+		errorMessage = response.NewErrorResponse("Esse e-mail já está em uso!")
+		return doctorId, err, errorMessage
 	}
 
 	passwordHashDB, saltDB, err := util.PasswordHash(doctor.GetUser().GetPassword())
@@ -98,7 +119,7 @@ func InsertDoctor(doctor model.Doctor) (bool, error) {
 		tx.Rollback()
 		println("Id do médico: ", tempDoctorId)
 		println("Error7: ", err.Error())
-		return success, err
+		return doctorId, err, errorMessage
 	}
 
 	_, err = tx.Exec(sql,
@@ -110,13 +131,13 @@ func InsertDoctor(doctor model.Doctor) (bool, error) {
 	if err != nil {
 		println("Id do médico: ", tempDoctorId)
 		println("Error8: ", err.Error())
-		return success, err
+		return doctorId, err, errorMessage
 	}
 
 	tx.Commit()
 
-	success = true
-	return success, err
+	doctorId = tempDoctorId
+	return doctorId, err, errorMessage
 }
 
 func DoctorValidateLogin(emailLogin string, passwordLogin string) (bool, int, error) {
