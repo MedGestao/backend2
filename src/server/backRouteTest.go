@@ -47,9 +47,15 @@ func OpenServerTest() {
 
 	router.HandleFunc("/api/doctors/deactivate", routers.DeactivateDoctor).Methods(http.MethodPost)
 
+	router.HandleFunc("/api/upload", routers.UploadFile).Methods(http.MethodPost)
+
 	// Inicialize o servidor na porta desejada
 	//http.Handle("/", c.Handler(createPatientRouter))
 	//http.Handle("/editRequestPatient", c.Handler(selectByIdPatientRouter))
+
+	// server static files
+	fs := http.FileServer(http.Dir("./tmp"))
+	router.PathPrefix("/public/").Handler(http.StripPrefix("/public/", fs))
 
 	handler := c.Handler(router)
 
