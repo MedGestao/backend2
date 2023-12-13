@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+var globalRows *sql.Rows
+
 func InsertDoctor(doctor model.Doctor) (int, error, response.ErrorResponse) {
 	var doctorId int
 	var err error
@@ -174,6 +176,116 @@ func DoctorValidateLogin(emailLogin string, passwordLogin string) (bool, int, er
 	}
 
 	return authorized, doctorIdDB, err
+}
+
+func DoctorSelectAll(doctorName string, specialtyDescription string) ([]response.DoctorResponse, error) {
+	db, err := connection.NewConnection()
+	var doctors []response.DoctorResponse
+
+	if err != nil {
+		return doctors, err
+	}
+	defer db.Close()
+
+	sql := "select distinct on (d.cpf) d.id, d.name, d.image_url, s.id, s.description as specialty from doctor d " +
+		"left join medical_specialty ms on d.id = ms.doctor_id " +
+		"left join specialty s on ms.specialty_id = s.id where d.active is true and d.image_url is not null"
+
+	if doctorName != "" && specialtyDescription != "" {
+		sql = "select distinct on (d.cpf) d.id, d.name, d.image_url, s.id, s.description as specialty from doctor d " +
+			"left join medical_specialty ms on d.id = ms.doctor_id " +
+			"left join specialty s on ms.specialty_id = s.id where d.active is true and d.image_url is not null" +
+			" and d.name like '%' || $1 || '%' and s.description like '%' || $2 || '%''"
+	}
+	if doctorName != "" {
+		println("Entrou!")
+		sql = "select distinct on (d.cpf) d.id, d.name, d.image_url, s.id, s.description as specialty from doctor d " +
+			"left join medical_specialty ms on d.id = ms.doctor_id " +
+			"left join specialty s on ms.specialty_id = s.id where d.active is true and d.image_url is not null" +
+			" and d.name like '%' || $1 || '%'"
+	}
+	if specialtyDescription != "" {
+		sql = "select distinct on (d.cpf) d.id, d.name, d.image_url, s.id, s.description as specialty from doctor d " +
+			"left join medical_specialty ms on d.id = ms.doctor_id " +
+			"left join specialty s on ms.specialty_id = s.id where d.active is true and d.image_url is not null" +
+			" and s.description like '%' || $1 || '%'"
+	}
+	_, err = db.Prepare(sql)
+	if err != nil {
+		println("Error3: ", err.Error())
+	}
+
+	// Adicionar condições dinamicamente
+	//var params []interface{}
+	//
+	//if doctorName != "" {
+	//	sql += "AND d.name LIKE $1 "
+	//	params = append(params, "%"+doctorName+"%")
+	//}
+	//
+	//if specialtyDescription != "" {
+	//	sql += "AND s.description LIKE $2 "
+	//	params = append(params, "%"+specialtyDescription+"%")
+	//}
+
+	var doctorNameDB,
+		doctorImageUrlDB,
+		doctorSpecialtyDB string
+	var doctorIdDB, doctorSpecialtyIdDB int
+
+	if doctorName == "" && specialtyDescription == "" {
+		globalRows, err = db.Query(sql)
+		if err != nil {
+			return doctors, err
+		}
+	} else if doctorName != "" {
+		globalRows, err = db.Query(sql,
+			doctorName)
+		if err != nil {
+			return doctors, err
+		}
+	} else if specialtyDescription != "" {
+		globalRows, err = db.Query(sql,
+			specialtyDescription)
+		if err != nil {
+			return doctors, err
+		}
+	} else {
+		globalRows, err = db.Query(sql,
+			doctorName,
+			specialtyDescription)
+		if err != nil {
+			return doctors, err
+		}
+	}
+
+	for globalRows.Next() {
+		err = globalRows.Scan(
+			&doctorIdDB,
+			&doctorNameDB,
+			&doctorImageUrlDB,
+			&doctorSpecialtyIdDB,
+			&doctorSpecialtyDB)
+		if err != nil {
+			println("Error nos dados retornados: ", err.Error())
+			return doctors, err
+		}
+		doctor := response.DoctorResponse{
+			User: response.UserResponse{
+				Id:       doctorIdDB,
+				Name:     doctorNameDB,
+				ImageUrl: doctorImageUrlDB,
+			},
+			Specialty: response.SpecialtyResponse{
+				Id:          doctorSpecialtyIdDB,
+				Description: doctorSpecialtyDB,
+			},
+		}
+
+		doctors = append(doctors, doctor)
+	}
+
+	return doctors, err
 }
 
 func DoctorSelectById(doctorId int) (model.Doctor, error) {

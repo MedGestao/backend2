@@ -3,25 +3,22 @@ package model
 import "time"
 
 type PatientDoctorConsultation struct {
-	id                int
-	appointmentDate   time.Time
-	timetable         string
-	patientId         int
-	doctorId          int
-	medicalScheduleId int
-	status            bool
-	value             float64
+	id              int
+	appointmentDate time.Time
+	appointmentTime string
+	patientId       int
+	doctorId        int
+	status          bool
+	value           float64
 }
 
-func NewPatientDoctorSchedule(appointmentDate time.Time, timetable string, patientId int, doctorId int, medicalScheduleId int, status bool, value float64) PatientDoctorConsultation {
+func NewPatientDoctorConsultation(appointmentDate time.Time, appointmentTime string, patientId int, doctorId int, value float64) PatientDoctorConsultation {
 	return PatientDoctorConsultation{
-		appointmentDate:   appointmentDate,
-		timetable:         timetable,
-		patientId:         patientId,
-		doctorId:          doctorId,
-		medicalScheduleId: medicalScheduleId,
-		status:            status,
-		value:             value,
+		appointmentDate: appointmentDate,
+		appointmentTime: appointmentTime,
+		patientId:       patientId,
+		doctorId:        doctorId,
+		value:           value,
 	}
 }
 
@@ -41,20 +38,28 @@ func (p *PatientDoctorConsultation) SetAppointmentDate(appointmentDate time.Time
 	p.appointmentDate = appointmentDate
 }
 
-func (p PatientDoctorConsultation) GetTimeTable() string {
-	return p.timetable
+func (p PatientDoctorConsultation) GetAppointmentTime() string {
+	return p.appointmentTime
 }
 
-func (p *PatientDoctorConsultation) SetTimeTable(timeTable string) {
-	p.timetable = timeTable
+func (p *PatientDoctorConsultation) SetAppointmentTime(timeTable string) {
+	p.appointmentTime = timeTable
 }
 
-func (p PatientDoctorConsultation) GetMedicalSchedule() int {
-	return p.medicalScheduleId
+func (p PatientDoctorConsultation) GetPatientId() int {
+	return p.patientId
 }
 
-func (p *PatientDoctorConsultation) SetMedicalSchedule(medicalSchedule int) {
-	p.medicalScheduleId = medicalSchedule
+func (p *PatientDoctorConsultation) SetPatientId(patientId int) {
+	p.patientId = patientId
+}
+
+func (p PatientDoctorConsultation) GetDoctorId() int {
+	return p.doctorId
+}
+
+func (p *PatientDoctorConsultation) SetDoctorId(doctorId int) {
+	p.doctorId = doctorId
 }
 
 func (p PatientDoctorConsultation) GetStatus() bool {

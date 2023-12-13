@@ -39,6 +39,8 @@ func OpenServerTest() {
 	//DOCTOR ROUTERS
 	router.HandleFunc("/api/doctors", routers.CreateDoctor).Methods(http.MethodPost)
 
+	router.HandleFunc("/api/doctors/selectAll", routers.GetDoctorsAll).Methods(http.MethodPost)
+
 	router.HandleFunc("/api/doctors/{id}", routers.GetDoctorById).Methods(http.MethodGet)
 
 	router.HandleFunc("/api/doctors/{id}", routers.EditDoctor).Methods(http.MethodPut)
@@ -61,6 +63,11 @@ func OpenServerTest() {
 	router.HandleFunc("/api/medicalSchedule/{id}", routers.GetMedicalScheduleById).Methods(http.MethodGet)
 
 	router.HandleFunc("/api/medicalSchedule/{id}", routers.EditMedicalSchedule).Methods(http.MethodPut)
+
+	// PATIENT DOCTOR CONSULTATION ROUTERS
+	router.HandleFunc("/api/patientDoctorConsultation", routers.CreatePatientDoctorConsutation).Methods(http.MethodPost)
+
+	router.HandleFunc("/api/patientDoctorConsultation/searchByDoctor/{id}", routers.GetPatientDoctorConsultationAllByIdDoctor).Methods(http.MethodGet)
 
 	// Inicialize o servidor na porta desejada
 	//http.Handle("/", c.Handler(createPatientRouter))
