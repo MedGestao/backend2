@@ -28,3 +28,8 @@ type DoctorAuthenticatorRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
+
+type DoctorFilterParameters struct {
+	DoctorName    string `json:"doctorName"`
+	SpecialtyName string `json:"specialtyName"`
+}

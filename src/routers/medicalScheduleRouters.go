@@ -31,7 +31,7 @@ func CreateMedicalSchedule(w http.ResponseWriter, r *http.Request) {
 	println("Id do médico da consulta: ", medicalSchedule.DoctorId.Id)
 	println("Valor da consulta: ", medicalSchedule.QueryValue)
 
-	success, err := controller.RegisterMedicalSchedule(medicalSchedule)
+	success, err, errorMessage := controller.RegisterMedicalSchedule(medicalSchedule)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -41,6 +41,10 @@ func CreateMedicalSchedule(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode("Agendamento configurado com sucesso!")
+	} else if errorMessage.Message != "" {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotAcceptable)
+		json.NewEncoder(w).Encode(errorMessage.Message)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotAcceptable)

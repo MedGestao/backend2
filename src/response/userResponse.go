@@ -7,6 +7,7 @@ type CellphoneResponse struct {
 }
 
 type UserResponse struct {
+	Id            int               `json:"id"`
 	Name          string            `json:"name"`
 	BirthDate     time.Time         `json:"birthDate"`
 	Cpf           string            `json:"cpf"`

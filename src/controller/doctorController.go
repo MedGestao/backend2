@@ -47,6 +47,12 @@ func DoctorAuthenticatorLogin(email string, password string) (bool, int, error) 
 	return authorized, doctorId, err
 }
 
+func DoctorSelectRegisterAll(doctorName string, specialtyName string) ([]response.DoctorResponse, error) {
+	doctors, err := dao.DoctorSelectAll(doctorName, specialtyName)
+
+	return doctors, err
+}
+
 func DoctorSelectRegisterById(doctorId int) (response.DoctorResponse, error) {
 	var d model.Doctor
 	var doctor response.DoctorResponse

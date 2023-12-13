@@ -3,14 +3,15 @@ package response
 import "time"
 
 type MedicalScheduleResponse struct {
-	Id           int              `json:"idResponse"`
-	DoctorId     DoctorIdResponse `json:"doctorIdResponse"`
-	QueryValue   float64          `json:"queryValueResponse"`
-	DayOfService string           `json:"dayOfServiceResponse"`
-	SpecificDate time.Time        `json:"specificDateResponse"`
-	Period1      string           `json:"period1"`
-	Period2      string           `json:"period2"`
-	Year         string           `json:"yearResponse"`
+	Id            int              `json:"id"`
+	DoctorId      DoctorIdResponse `json:"doctorId"`
+	QueryValue    float64          `json:"queryValue"`
+	DayOfService  string           `json:"dayOfService"`
+	SpecificDate  time.Time        `json:"specificDate"`
+	Period1       string           `json:"period1"`
+	Period2       string           `json:"period2"`
+	Year          string           `json:"year"`
+	ScheduleLimit int              `json:"scheduleLimit"`
 }
 
 type MedicalScheduleIdResponse struct {

@@ -3,27 +3,29 @@ package model
 import "time"
 
 type MedicalSchedule struct {
-	id           int
-	doctorId     int
-	queryValue   float64
-	dayOfService string
-	specificDate time.Time
-	period1      string
-	period2      string
-	year         string
-	active       bool
+	id            int
+	doctorId      int
+	queryValue    float64
+	dayOfService  string
+	specificDate  time.Time
+	period1       string
+	period2       string
+	year          string
+	scheduleLimit int
+	active        bool
 }
 
 func NewMedicalSchedule(doctorId int, queryValue float64, dayOfService string, specificDate time.Time, startTime string,
-	finalTime string, year string) MedicalSchedule {
+	finalTime string, year string, scheduleLimit int) MedicalSchedule {
 	return MedicalSchedule{
-		doctorId:     doctorId,
-		queryValue:   queryValue,
-		dayOfService: dayOfService,
-		specificDate: specificDate,
-		period1:      startTime,
-		period2:      finalTime,
-		year:         year,
+		doctorId:      doctorId,
+		queryValue:    queryValue,
+		dayOfService:  dayOfService,
+		specificDate:  specificDate,
+		period1:       startTime,
+		period2:       finalTime,
+		year:          year,
+		scheduleLimit: scheduleLimit,
 	}
 }
 
@@ -89,6 +91,14 @@ func (m MedicalSchedule) GetYear() string {
 
 func (m *MedicalSchedule) SetYear(year string) {
 	m.year = year
+}
+
+func (m MedicalSchedule) GetScheduleLimit() int {
+	return m.scheduleLimit
+}
+
+func (m *MedicalSchedule) SetScheduleLimit(scheduleLimit int) {
+	m.scheduleLimit = scheduleLimit
 }
 
 func (m MedicalSchedule) IsActive() bool {

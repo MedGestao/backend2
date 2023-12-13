@@ -57,6 +57,26 @@ func CreateDoctor(w http.ResponseWriter, r *http.Request) {
 	//}
 }
 
+func GetDoctorsAll(w http.ResponseWriter, r *http.Request) {
+	var doctorFilterParameters request.DoctorFilterParameters
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&doctorFilterParameters); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	doctors, err := controller.DoctorSelectRegisterAll(doctorFilterParameters.DoctorName, doctorFilterParameters.SpecialtyName)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Retorna os dados do paciente no formato JSON
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(doctors)
+	w.WriteHeader(http.StatusOK)
+}
+
 func GetDoctorById(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	// Decodifica os dados JSON do corpo da solicitação
