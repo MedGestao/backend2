@@ -7,22 +7,24 @@ import (
 	"MedGestao/src/response"
 )
 
-func RegisterMedicalSchedule(medicalScheduleRequest request.MedicalScheduleRequest) (bool, error) {
+func RegisterMedicalSchedule(medicalScheduleRequest []request.MedicalScheduleRequest) (bool, error) {
 	var success bool
 	var err error
 
-	if medicalScheduleRequest == (request.MedicalScheduleRequest{}) {
+	if len(medicalScheduleRequest) == 0 {
 		println("Nenhum dado recebido")
 		return success, err
 	}
 
-	medicalSchedule := model.NewMedicalSchedule(medicalScheduleRequest.DoctorId.Id, medicalScheduleRequest.QueryValue,
-		medicalScheduleRequest.DayOfService, medicalScheduleRequest.SpecificDate, medicalScheduleRequest.Period1,
-		medicalScheduleRequest.Period2, medicalScheduleRequest.Year)
+	for _, value := range medicalScheduleRequest {
+		medicalSchedule := model.NewMedicalSchedule(value.DoctorId.Id, value.QueryValue,
+			value.DayOfService, value.Period1,
+			value.Period2)
 
-	success, err = dao.MedicalScheduleInsert(medicalSchedule)
-	if err != nil {
-		return success, err
+		success, err = dao.MedicalScheduleInsert(medicalSchedule)
+		if err != nil {
+			return success, err
+		}
 	}
 
 	return success, err
@@ -50,10 +52,8 @@ func SearchAllMedicalScheduleByIdDoctor(doctorId int) ([]response.MedicalSchedul
 			DoctorId:     doctorId,
 			QueryValue:   medicalScheduleDB.GetQueryValue(),
 			DayOfService: medicalScheduleDB.GetDayOfService(),
-			SpecificDate: medicalScheduleDB.GetSpecificDate(),
 			Period1:      medicalScheduleDB.GetPeriod1(),
 			Period2:      medicalScheduleDB.GetPeriod2(),
-			Year:         medicalScheduleDB.GetYear(),
 		}
 
 		medicalScheduleList = append(medicalScheduleList, medicalSchedule)
@@ -94,10 +94,8 @@ func SearchByIdMedicalSchedule(id int) (response.MedicalScheduleResponse, error)
 		DoctorId:     doctorId,
 		QueryValue:   m.GetQueryValue(),
 		DayOfService: m.GetDayOfService(),
-		SpecificDate: m.GetSpecificDate(),
 		Period1:      m.GetPeriod1(),
 		Period2:      m.GetPeriod2(),
-		Year:         m.GetYear(),
 	}
 
 	return medicalSchedule, err
@@ -111,8 +109,8 @@ func EditMedicalSchedule(medicalScheduleIdRequest int, medicalScheduleRequest re
 	}
 
 	medicalSchedule := model.NewMedicalSchedule(medicalScheduleRequest.DoctorId.Id, medicalScheduleRequest.QueryValue,
-		medicalScheduleRequest.DayOfService, medicalScheduleRequest.SpecificDate, medicalScheduleRequest.Period1,
-		medicalScheduleRequest.Period2, medicalScheduleRequest.Year)
+		medicalScheduleRequest.DayOfService, medicalScheduleRequest.Period1,
+		medicalScheduleRequest.Period2)
 	medicalSchedule.SetId(medicalScheduleIdRequest)
 	success, err = dao.MedicalScheduleEdit(medicalSchedule)
 	if err != nil {

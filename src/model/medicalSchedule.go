@@ -1,29 +1,23 @@
 package model
 
-import "time"
-
 type MedicalSchedule struct {
 	id           int
 	doctorId     int
 	queryValue   float64
 	dayOfService string
-	specificDate time.Time
 	period1      string
 	period2      string
-	year         string
 	active       bool
 }
 
-func NewMedicalSchedule(doctorId int, queryValue float64, dayOfService string, specificDate time.Time, startTime string,
-	finalTime string, year string) MedicalSchedule {
+func NewMedicalSchedule(doctorId int, queryValue float64, dayOfService string, startTime string,
+	finalTime string) MedicalSchedule {
 	return MedicalSchedule{
 		doctorId:     doctorId,
 		queryValue:   queryValue,
 		dayOfService: dayOfService,
-		specificDate: specificDate,
 		period1:      startTime,
 		period2:      finalTime,
-		year:         year,
 	}
 }
 
@@ -59,14 +53,6 @@ func (m *MedicalSchedule) SetDayOfService(dayOfService string) {
 	m.dayOfService = dayOfService
 }
 
-func (m MedicalSchedule) GetSpecificDate() time.Time {
-	return m.specificDate
-}
-
-func (m *MedicalSchedule) SetSpecificTime(specificDate time.Time) {
-	m.specificDate = specificDate
-}
-
 func (m MedicalSchedule) GetPeriod1() string {
 	return m.period1
 }
@@ -81,14 +67,6 @@ func (m MedicalSchedule) GetPeriod2() string {
 
 func (m *MedicalSchedule) SetPeriod2(period2 string) {
 	m.period2 = period2
-}
-
-func (m MedicalSchedule) GetYear() string {
-	return m.year
-}
-
-func (m *MedicalSchedule) SetYear(year string) {
-	m.year = year
 }
 
 func (m MedicalSchedule) IsActive() bool {

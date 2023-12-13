@@ -5,8 +5,9 @@ type Specialty struct {
 	description string
 }
 
-func NewSpecialty(description string) Specialty {
+func NewSpecialty(id int, description string) Specialty {
 	return Specialty{
+		id:          id,
 		description: description,
 	}
 }

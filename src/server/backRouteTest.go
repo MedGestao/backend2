@@ -45,12 +45,16 @@ func OpenServerTest() {
 
 	router.HandleFunc("/api/doctors/login", routers.ValidateLoginDoctor).Methods(http.MethodPost)
 
+	router.HandleFunc("/api/validate-email", routers.ValidateEmailDoctor).Queries("email", "{email}").Methods(http.MethodGet)
+
 	router.HandleFunc("/api/doctors/deactivate", routers.DeactivateDoctor).Methods(http.MethodPost)
+
+	router.HandleFunc("/api/specialties", routers.GetSpecialty).Methods(http.MethodGet)
 
 	router.HandleFunc("/api/upload", routers.UploadFile).Methods(http.MethodPost)
 
 	//MEDICAL SCHEDULE ROUTERS
-	router.HandleFunc("/api/medicalSchedule", routers.CreateMedicalSchedule).Methods(http.MethodPost)
+	router.HandleFunc("/api/doctors/schedule", routers.CreateMedicalSchedule).Methods(http.MethodPost)
 
 	router.HandleFunc("/api/medicalSchedule/listSchedules/{id}", routers.GetMedicalScheduleAllByIdDoctor).Methods(http.MethodGet)
 

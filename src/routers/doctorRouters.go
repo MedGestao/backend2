@@ -37,7 +37,7 @@ func CreateDoctor(w http.ResponseWriter, r *http.Request) {
 	if errorMessage.Message != "" {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(errorMessage.Message)
+		json.NewEncoder(w).Encode(errorMessage)
 	} else {
 		doctorIdResponse := response.DoctorIdResponse{Id: doctorId}
 		w.Header().Set("Content-Type", "application/json")
@@ -58,25 +58,47 @@ func CreateDoctor(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetDoctorById(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	// Decodifica os dados JSON do corpo da solicitação
-	id := params["id"]
-	if id == "" {
-		http.Error(w, "Id não foi informado", http.StatusBadRequest)
-		return
+	/* 	params := mux.Vars(r)
+	   	// Decodifica os dados JSON do corpo da solicitação
+	   	id := params["id"]
+	   	if id == "" {
+	   		http.Error(w, "Id não foi informado", http.StatusBadRequest)
+	   		return
+	   	}
+
+	   	doctorId, err := strconv.Atoi(id)
+	   	if err != nil {
+	   		http.Error(w, err.Error(), http.StatusInternalServerError)
+	   		return
+	   	}
+
+	   	// Chama a função que lê o paciente do banco de dados
+	   	doctor, err := controller.DoctorSelectRegisterById(doctorId)
+	   	if err != nil {
+	   		http.Error(w, err.Error(), http.StatusInternalServerError)
+	   		return
+	   	}
+
+	   	// Retorna os dados do paciente no formato JSON
+	   	w.Header().Set("Content-Type", "application/json")
+	   	json.NewEncoder(w).Encode(doctor)
+	   	w.WriteHeader(http.StatusOK) */
+	var doctor response.DoctorResponse
+
+	cellphoneUserResponse := response.CellphoneResponse{
+		Number: "1223",
+	}
+	userResponse := response.UserResponse{
+		Name:          "Test",
+		ImageUrl:      "http://192.168.0.164:3001/public/upload-3517911352.png",
+		CellphoneUser: cellphoneUserResponse,
 	}
 
-	doctorId, err := strconv.Atoi(id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Chama a função que lê o paciente do banco de dados
-	doctor, err := controller.DoctorSelectRegisterById(doctorId)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	specialtyUserResponse := response.SpecialtyResponse{Description: "sdhjfghjad"}
+	doctor = response.DoctorResponse{
+		User:      userResponse,
+		Crm:       "122",
+		Specialty: specialtyUserResponse,
 	}
 
 	// Retorna os dados do paciente no formato JSON
@@ -144,6 +166,20 @@ func ValidateLoginDoctor(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func ValidateEmailDoctor(w http.ResponseWriter, r *http.Request) {
+	email := mux.Vars(r)["email"]
+
+	isValid := controller.ValidateEmailDoctor(email)
+
+	if isValid == true {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+	} else {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+	}
+}
+
 func DeactivateDoctor(w http.ResponseWriter, r *http.Request) {
 	// Decodifica os dados JSON do corpo da solicitação
 	var idRequest request.DoctorIdRequest
@@ -171,4 +207,19 @@ func DeactivateDoctor(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotAcceptable)
 		json.NewEncoder(w).Encode(response.NewErrorResponse("Não foi possível desativar o médico!"))
 	}
+}
+
+func GetSpecialty(w http.ResponseWriter, r *http.Request) {
+
+	var specialties []response.SpecialtyResponse
+
+	specialties, err := controller.SelectSpecialties()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(specialties)
+	w.WriteHeader(http.StatusOK)
 }

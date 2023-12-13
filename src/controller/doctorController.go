@@ -17,7 +17,7 @@ func DoctorRegister(doctorRequest request.DoctorRequest) (int, error, response.E
 	}
 
 	cellPhoneUser := model.NewCellphoneUser(doctorRequest.User.CellphoneUser.Number)
-	specialty := model.NewSpecialty(doctorRequest.Specialty.Description)
+	specialty := model.NewSpecialty(doctorRequest.Specialty.ID, doctorRequest.Specialty.Description)
 
 	doctor := model.NewDoctor(doctorRequest.User.Name, doctorRequest.User.BirthDate, doctorRequest.User.Cpf,
 		doctorRequest.User.Sex, doctorRequest.User.Address, doctorRequest.User.Email, cellPhoneUser, doctorRequest.User.Password,
@@ -95,7 +95,7 @@ func DoctorRegisterEdit(idDoctorRequest int, doctorRequest request.DoctorRequest
 	}
 
 	cellPhoneUser := model.NewCellphoneUser(doctorRequest.User.CellphoneUser.Number)
-	specialty := model.NewSpecialty(doctorRequest.Specialty.Description)
+	specialty := model.NewSpecialty(doctorRequest.Specialty.ID, doctorRequest.Specialty.Description)
 
 	doctor := model.NewDoctor(doctorRequest.User.Name, doctorRequest.User.BirthDate, doctorRequest.User.Cpf,
 		doctorRequest.User.Sex, doctorRequest.User.Address, doctorRequest.User.Email, cellPhoneUser, doctorRequest.User.Password,
@@ -131,4 +131,23 @@ func DoctorRegisterOff(doctorId int) (bool, error) {
 	}
 
 	return success, err
+}
+
+func SelectSpecialties() ([]response.SpecialtyResponse, error) {
+	var specialties []response.SpecialtyResponse
+	var err error
+
+	specialties, err = dao.SelectSpecialties()
+	if err != nil {
+		println("Error na busca das informações do paciente: ", err.Error())
+		return specialties, err
+	}
+
+	return specialties, err
+}
+
+func ValidateEmailDoctor(email string) bool {
+	isValid, _ := dao.ValidateEmailDoctor(email)
+
+	return isValid
 }

@@ -3,33 +3,23 @@ package routers
 import (
 	"MedGestao/src/controller"
 	"MedGestao/src/request"
-	"MedGestao/src/util"
 	"encoding/json"
-	"github.com/gorilla/mux"
 	"net/http"
 	"strconv"
-	"time"
+
+	"github.com/gorilla/mux"
 )
 
 const DateFormatMedicalSchedule = "2006-01-02 15:04:05 -0700 MST"
 
 func CreateMedicalSchedule(w http.ResponseWriter, r *http.Request) {
 
-	var medicalSchedule request.MedicalScheduleRequest
+	var medicalSchedule []request.MedicalScheduleRequest
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&medicalSchedule); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
-	var err error
-	medicalSchedule.SpecificDate, err = time.Parse(util.DateFormat, medicalSchedule.SpecificDate.String())
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	println("Id do médico da consulta: ", medicalSchedule.DoctorId.Id)
-	println("Valor da consulta: ", medicalSchedule.QueryValue)
 
 	success, err := controller.RegisterMedicalSchedule(medicalSchedule)
 	if err != nil {

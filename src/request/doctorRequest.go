@@ -1,6 +1,7 @@
 package request
 
 type SpecialtyRequest struct {
+	ID          int    `json:"id"`
 	Description string `json:"description,omitempty"`
 }
 
