@@ -1,19 +1,19 @@
 package request
 
 type PatientRequest struct {
-	User UserRequest `json:"userPatientRequest"`
+	User UserRequest `json:"user"`
 }
 
 type PatientIdRequest struct {
-	Id int `json:"idPatientSelectRequest"`
+	Id int `json:"id"`
 }
 
-type EditPatientRequest struct {
-	PatientIdRequest PatientIdRequest `json:"patientEditIdRequest"`
-	PatientRequest   PatientRequest   `json:"patientEditRequest"`
-}
+//type EditPatientRequest struct {
+//	PatientIdRequest PatientIdRequest `json:"patientEditIdRequest"`
+//	PatientRequest   PatientRequest   `json:"patientEditRequest"`
+//}
 
 type PatientAuthenticatorRequest struct {
-	Email    string `json:"emailAuthenticatorRequest"`
-	Password string `json:"passwordAuthenticatorRequest"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }

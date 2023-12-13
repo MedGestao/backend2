@@ -7,27 +7,28 @@ import (
 	"MedGestao/src/response"
 )
 
-func DoctorRegister(doctorRequest request.DoctorRequest) (bool, error) {
+func DoctorRegister(doctorRequest request.DoctorRequest) (int, error, response.ErrorResponse) {
 
-	var success bool
+	var doctorId int
 	var err error
+	var errorMessage response.ErrorResponse
 	if doctorRequest.User.Name == "" {
-		return success, err
+		return doctorId, err, errorMessage
 	}
 
 	cellPhoneUser := model.NewCellphoneUser(doctorRequest.User.CellphoneUser.Number)
-	specialty := model.NewSpecialty(doctorRequest.Specialty.Description)
+	specialty := model.NewSpecialty(doctorRequest.Specialty.ID, doctorRequest.Specialty.Description)
 
 	doctor := model.NewDoctor(doctorRequest.User.Name, doctorRequest.User.BirthDate, doctorRequest.User.Cpf,
 		doctorRequest.User.Sex, doctorRequest.User.Address, doctorRequest.User.Email, cellPhoneUser, doctorRequest.User.Password,
 		doctorRequest.User.ImageUrl, doctorRequest.Crm, specialty)
 
-	success, err = dao.InsertDoctor(doctor)
+	doctorId, err, errorMessage = dao.InsertDoctor(doctor)
 	if err != nil {
-		return success, err
+		return doctorId, err, errorMessage
 	}
 
-	return success, err
+	return doctorId, err, errorMessage
 }
 
 func DoctorAuthenticatorLogin(email string, password string) (bool, int, error) {
@@ -44,6 +45,12 @@ func DoctorAuthenticatorLogin(email string, password string) (bool, int, error) 
 	}
 
 	return authorized, doctorId, err
+}
+
+func DoctorSelectRegisterAll(doctorName string, specialtyName string) ([]response.DoctorResponse, error) {
+	doctors, err := dao.DoctorSelectAll(doctorName, specialtyName)
+
+	return doctors, err
 }
 
 func DoctorSelectRegisterById(doctorId int) (response.DoctorResponse, error) {
@@ -83,24 +90,24 @@ func DoctorSelectRegisterById(doctorId int) (response.DoctorResponse, error) {
 	return doctor, err
 }
 
-func DoctorRegisterEdit(idDoctorRequest request.DoctorIdRequest, doctorRequest request.DoctorRequest) (bool, error) {
+func DoctorRegisterEdit(idDoctorRequest int, doctorRequest request.DoctorRequest) (bool, error) {
 
 	var success bool
 	var err error
 
 	//Adicionar essas condições depois: || patient == nil || patient.User == nil no lugar da que está comparando o nome
-	if idDoctorRequest.Id == 0 || doctorRequest.User.Name == "" {
+	if idDoctorRequest == 0 || doctorRequest.User.Name == "" {
 		return success, err
 	}
 
 	cellPhoneUser := model.NewCellphoneUser(doctorRequest.User.CellphoneUser.Number)
-	specialty := model.NewSpecialty(doctorRequest.Specialty.Description)
+	specialty := model.NewSpecialty(doctorRequest.Specialty.ID, doctorRequest.Specialty.Description)
 
 	doctor := model.NewDoctor(doctorRequest.User.Name, doctorRequest.User.BirthDate, doctorRequest.User.Cpf,
 		doctorRequest.User.Sex, doctorRequest.User.Address, doctorRequest.User.Email, cellPhoneUser, doctorRequest.User.Password,
 		doctorRequest.User.ImageUrl, doctorRequest.Crm, specialty)
 
-	success, err = dao.DoctorEdit(idDoctorRequest.Id, doctor)
+	success, err = dao.DoctorEdit(idDoctorRequest, doctor)
 	if err != nil {
 		return success, err
 	}
@@ -130,4 +137,23 @@ func DoctorRegisterOff(doctorId int) (bool, error) {
 	}
 
 	return success, err
+}
+
+func SelectSpecialties() ([]response.SpecialtyResponse, error) {
+	var specialties []response.SpecialtyResponse
+	var err error
+
+	specialties, err = dao.SelectSpecialties()
+	if err != nil {
+		println("Error na busca das informações do paciente: ", err.Error())
+		return specialties, err
+	}
+
+	return specialties, err
+}
+
+func ValidateEmailDoctor(email string) bool {
+	isValid, _ := dao.ValidateEmailDoctor(email)
+
+	return isValid
 }

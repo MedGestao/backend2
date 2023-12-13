@@ -1,6 +1,7 @@
 package response
 
 type SpecialtyResponse struct {
+	Id          int    `json:"id"`
 	Description string `json:"description"`
 }
 
@@ -11,5 +12,5 @@ type DoctorResponse struct {
 }
 
 type DoctorIdResponse struct {
-	Id int `json:"idDoctorSelectResponse"`
+	Id int `json:"id"`
 }

@@ -1,7 +1,8 @@
 package request
 
 type SpecialtyRequest struct {
-	Description string `json:"specialtyDescription,omitempty"`
+	ID          int    `json:"id"`
+	Description string `json:"description,omitempty"`
 }
 
 //type EditSpecialtyRequest struct {
@@ -10,21 +11,26 @@ type SpecialtyRequest struct {
 //}
 
 type DoctorRequest struct {
-	User      UserRequest      `json:"userDoctorRequest"`
-	Crm       string           `json:"crmDoctorRequest"`
-	Specialty SpecialtyRequest `json:"specialtyDoctorRequest"`
+	User      UserRequest      `json:"user"`
+	Crm       string           `json:"crm"`
+	Specialty SpecialtyRequest `json:"specialty"`
 }
 
 type DoctorIdRequest struct {
-	Id int `json:"idDoctorSelectRequest"`
+	Id int `json:"id"`
 }
 
-type EditDoctorRequest struct {
-	DoctorIdRequest DoctorIdRequest `json:"doctorEditIdRequest"`
-	DoctorRequest   DoctorRequest   `json:"doctorEditRequest"`
-}
+//type EditDoctorRequest struct {
+//	DoctorIdRequest DoctorIdRequest `json:"doctorEditIdRequest"`
+//	DoctorRequest   DoctorRequest   `json:"doctorEditRequest"`
+//}
 
 type DoctorAuthenticatorRequest struct {
-	Email    string `json:"emailAuthenticatorRequest"`
-	Password string `json:"passwordAuthenticatorRequest"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type DoctorFilterParameters struct {
+	DoctorName    string `json:"doctorName"`
+	SpecialtyName string `json:"specialtyName"`
 }

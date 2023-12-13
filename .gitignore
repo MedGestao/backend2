@@ -22,7 +22,12 @@ Thumbs.db
 *.swo
 
 # Ignorar arquivos de ambiente
-.env
+postgres-data
+# Ignore all files in the 'tmp' folder
+tmp/*
+
+# Except for the .gitkeep file
+!tmp/.gitkeep
 
 # Ignorar arquivos de configuração específicos do usuário
 .bash_history

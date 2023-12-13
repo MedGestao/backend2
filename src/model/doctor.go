@@ -77,6 +77,10 @@ func (p *Doctor) SetUserCellphoneUser(newCellphoneUser CellphoneUser) {
 	p.user.SetCellphoneUser(newCellphoneUser)
 }
 
+func (p *Doctor) SetUserImageUrl(userImageUrl string) {
+	p.user.SetImageUrl(userImageUrl)
+}
+
 func (d Doctor) GetCrm() string {
 	return d.crm
 }

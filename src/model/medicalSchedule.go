@@ -1,25 +1,31 @@
 package model
 
+import "time"
+
 type MedicalSchedule struct {
-	id           int
-	doctorId     int
-	dayOfService string
-	specificTime string
-	startTime    string
-	finalTime    string
-	year         string
-	active       bool
+	id            int
+	doctorId      int
+	queryValue    float64
+	dayOfService  string
+	specificDate  time.Time
+	period1       string
+	period2       string
+	year          string
+	scheduleLimit int
+	active        bool
 }
 
-func NewMedicalSchedule(doctorId int, dayOfService string, specificTime string, startTime string,
-	finalTime string, year string) MedicalSchedule {
+func NewMedicalSchedule(doctorId int, queryValue float64, dayOfService string, specificDate time.Time, startTime string,
+	finalTime string, year string, scheduleLimit int) MedicalSchedule {
 	return MedicalSchedule{
-		doctorId:     doctorId,
-		dayOfService: dayOfService,
-		specificTime: specificTime,
-		startTime:    startTime,
-		finalTime:    finalTime,
-		year:         year,
+		doctorId:      doctorId,
+		queryValue:    queryValue,
+		dayOfService:  dayOfService,
+		specificDate:  specificDate,
+		period1:       startTime,
+		period2:       finalTime,
+		year:          year,
+		scheduleLimit: scheduleLimit,
 	}
 }
 
@@ -35,54 +41,70 @@ func (m MedicalSchedule) GetDoctorId() int {
 	return m.doctorId
 }
 
-func (a *MedicalSchedule) SetDoctorId(doctorId int) {
-	a.doctorId = doctorId
+func (m *MedicalSchedule) SetDoctorId(doctorId int) {
+	m.doctorId = doctorId
 }
 
-func (a MedicalSchedule) GetDayOfService() string {
-	return a.dayOfService
+func (m MedicalSchedule) GetQueryValue() float64 {
+	return m.queryValue
 }
 
-func (a *MedicalSchedule) SetDayOfService(dayOfService string) {
-	a.dayOfService = dayOfService
+func (m *MedicalSchedule) SetQueryValue(queryValue float64) {
+	m.queryValue = queryValue
 }
 
-func (a MedicalSchedule) GetSpecificTime() string {
-	return a.specificTime
+func (m MedicalSchedule) GetDayOfService() string {
+	return m.dayOfService
 }
 
-func (a *MedicalSchedule) SetSpecificTime(specificTime string) {
-	a.specificTime = specificTime
+func (m *MedicalSchedule) SetDayOfService(dayOfService string) {
+	m.dayOfService = dayOfService
 }
 
-func (a MedicalSchedule) GetStartTime() string {
-	return a.startTime
+func (m MedicalSchedule) GetPeriod1() string {
+	return m.period1
 }
 
-func (a *MedicalSchedule) SetStartTime(startTime string) {
-	a.startTime = startTime
+func (m *MedicalSchedule) SetPeriod1(period1 string) {
+	m.period1 = period1
 }
 
-func (a MedicalSchedule) GetFinalTime() string {
-	return a.finalTime
+func (m MedicalSchedule) GetPeriod2() string {
+	return m.period2
 }
 
-func (a *MedicalSchedule) SetFinalTime(finalTime string) {
-	a.finalTime = finalTime
+func (m *MedicalSchedule) SetPeriod2(period2 string) {
+	m.period2 = period2
 }
 
-func (a MedicalSchedule) GetYear() string {
-	return a.year
+func (m MedicalSchedule) GetYear() string {
+	return m.year
 }
 
-func (a *MedicalSchedule) SetYear(year string) {
-	a.year = year
+func (m *MedicalSchedule) SetYear(year string) {
+	m.year = year
 }
 
-func (a MedicalSchedule) IsActive() bool {
-	return a.active
+func (m MedicalSchedule) GetScheduleLimit() int {
+	return m.scheduleLimit
 }
 
-func (a *MedicalSchedule) SetActive(active bool) {
-	a.active = active
+func (m *MedicalSchedule) SetScheduleLimit(scheduleLimit int) {
+	m.scheduleLimit = scheduleLimit
+}
+
+func (m MedicalSchedule) IsActive() bool {
+	return m.active
+}
+
+func (m *MedicalSchedule) SetActive(active bool) {
+	m.active = active
+}
+
+func (m MedicalSchedule) GetSpecificDate() time.Time {
+	return m.specificDate
+}
+
+func (m *MedicalSchedule) SetSpecificDate(specificDate time.Time) {
+	m.specificDate = specificDate
 }

@@ -2,29 +2,16 @@ package server
 
 import (
 	"MedGestao/src/routers"
-	"github.com/rs/cors"
 	"log"
 	"net/http"
+
+	"github.com/rs/cors"
 
 	"github.com/gorilla/mux"
 )
 
 func OpenServerTest() {
-	muxRouter := http.NewServeMux()
-
-	//PATIENT
-	createPatientRouter := mux.NewRouter()
-	selectByIdPatientRouter := mux.NewRouter()
-	editPatientRouter := mux.NewRouter()
-	validatePatientLoginRouter := mux.NewRouter()
-	deactivatePatientRouter := mux.NewRouter()
-
-	//DOCTOR
-	createDoctorRouter := mux.NewRouter()
-	selectByIdDoctorRouter := mux.NewRouter()
-	editDoctorRouter := mux.NewRouter()
-	validadeDoctorLoginRouter := mux.NewRouter()
-	deactivateDoctorRouter := mux.NewRouter()
+	router := mux.NewRouter()
 
 	// Configuração do CORS
 	//c := cors.AllowAll()
@@ -32,57 +19,66 @@ func OpenServerTest() {
 	// Crie um middleware de CORS com configurações padrão
 
 	c := cors.New(cors.Options{
-		AllowedOrigins: []string{"http://localhost:3001"}, // Origens permitidas (adapte ao seu ambiente)
-		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE"},
+		AllowedOrigins: []string{"http://localhost:3001", "http://localhost:3000"}, // Origens permitidas (adapte ao seu ambiente)
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders: []string{"Content-Type"},
 	})
 
 	//PATIENT ROUTERS
 	// Defina uma rota para lidar com solicitações POST para criar um paciente
-	createPatientRouter.HandleFunc("/api/createPatient", routers.CreatePatient).Methods("POST")
-	// Lide com solicitações createPatient com o middleware CORS
-	muxRouter.Handle("/api/createPatient", c.Handler(createPatientRouter))
+	router.HandleFunc("/api/patients", routers.CreatePatient).Methods(http.MethodPost)
 
-	selectByIdPatientRouter.HandleFunc("/api/selectByIdPatient", routers.GetPatientById).Methods("POST")
-	//selectByIdPatientRouter.HandleFunc("/api/selectByIdPatient/{id}", routers.GetPatientById).Methods("GET")
-	// Lide com solicitações selectByIdPatient com o middleware CORS
-	muxRouter.Handle("/api/selectByIdPatient", c.Handler(selectByIdPatientRouter))
+	router.HandleFunc("/api/patients/{id}", routers.GetPatientById).Methods(http.MethodGet)
 
-	editPatientRouter.HandleFunc("/api/editPatient", routers.EditPatient).Methods("POST")
-	muxRouter.Handle("/api/editPatient", c.Handler(editPatientRouter))
+	router.HandleFunc("/api/patients/{id}", routers.EditPatient).Methods(http.MethodPut)
 
-	validatePatientLoginRouter.HandleFunc("api/login", routers.ValidateLoginPatient).Methods("POST")
-	muxRouter.Handle("/api/login", c.Handler(validatePatientLoginRouter))
+	router.HandleFunc("/api/patients/login", routers.ValidateLoginPatient).Methods(http.MethodPost)
 
-	deactivatePatientRouter.HandleFunc("/api/deactivatePatient", routers.DeactivatePatient).Methods("POST")
-	//selectByIdPatientRouter.HandleFunc("/api/selectByIdPatient/{id}", routers.GetPatientById).Methods("GET")
-	// Lide com solicitações selectByIdPatient com o middleware CORS
-	muxRouter.Handle("/api/deactivatePatient", c.Handler(deactivatePatientRouter))
+	router.HandleFunc("/api/patients/deactivate", routers.DeactivatePatient).Methods(http.MethodPost)
 
 	//DOCTOR ROUTERS
-	createDoctorRouter.HandleFunc("/api/createDoctor", routers.CreateDoctor).Methods("POST")
-	// Lide com solicitações createPatient com o middleware CORS
-	muxRouter.Handle("/api/createDoctor", c.Handler(createDoctorRouter))
+	router.HandleFunc("/api/doctors", routers.CreateDoctor).Methods(http.MethodPost)
 
-	selectByIdDoctorRouter.HandleFunc("/api/selectByIdDoctor", routers.GetDoctorById).Methods("POST")
-	//selectByIdPatientRouter.HandleFunc("/api/selectByIdPatient/{id}", routers.GetPatientById).Methods("GET")
-	// Lide com solicitações selectByIdPatient com o middleware CORS
-	muxRouter.Handle("/api/selectByIdDoctor", c.Handler(selectByIdDoctorRouter))
+	router.HandleFunc("/api/doctors/selectAll", routers.GetDoctorsAll).Methods(http.MethodPost)
 
-	editDoctorRouter.HandleFunc("/api/editDoctor", routers.EditDoctor).Methods("POST")
-	muxRouter.Handle("/api/editDoctor", c.Handler(editDoctorRouter))
+	router.HandleFunc("/api/doctors/{id}", routers.GetDoctorById).Methods(http.MethodGet)
 
-	validadeDoctorLoginRouter.HandleFunc("/api/validateLoginDoctor", routers.ValidateLoginDoctor).Methods("POST")
-	muxRouter.Handle("/api/validateLoginDoctor", c.Handler(validadeDoctorLoginRouter))
+	router.HandleFunc("/api/doctors/{id}", routers.EditDoctor).Methods(http.MethodPut)
 
-	deactivateDoctorRouter.HandleFunc("/api/deactivateDoctor", routers.DeactivateDoctor).Methods("POST")
-	//selectByIdPatientRouter.HandleFunc("/api/selectByIdPatient/{id}", routers.GetPatientById).Methods("GET")
-	// Lide com solicitações selectByIdPatient com o middleware CORS
-	muxRouter.Handle("/api/deactivateDoctor", c.Handler(deactivateDoctorRouter))
+	router.HandleFunc("/api/doctors/login", routers.ValidateLoginDoctor).Methods(http.MethodPost)
+
+	router.HandleFunc("/api/validate-email", routers.ValidateEmailDoctor).Queries("email", "{email}").Methods(http.MethodGet)
+
+	router.HandleFunc("/api/doctors/deactivate", routers.DeactivateDoctor).Methods(http.MethodPost)
+
+	router.HandleFunc("/api/specialties", routers.GetSpecialty).Methods(http.MethodGet)
+
+	router.HandleFunc("/api/upload", routers.UploadFile).Methods(http.MethodPost)
+
+	//MEDICAL SCHEDULE ROUTERS
+	router.HandleFunc("/api/doctors/schedule", routers.CreateMedicalSchedule).Methods(http.MethodPost)
+
+	router.HandleFunc("/api/medicalSchedule/listSchedules/{id}", routers.GetMedicalScheduleAllByIdDoctor).Methods(http.MethodGet)
+
+	router.HandleFunc("/api/medicalSchedule/{id}", routers.GetMedicalScheduleById).Methods(http.MethodGet)
+
+	router.HandleFunc("/api/medicalSchedule/{id}", routers.EditMedicalSchedule).Methods(http.MethodPut)
+
+	// PATIENT DOCTOR CONSULTATION ROUTERS
+	router.HandleFunc("/api/patientDoctorConsultation", routers.CreatePatientDoctorConsutation).Methods(http.MethodPost)
+
+	router.HandleFunc("/api/patientDoctorConsultation/searchByDoctor/{id}", routers.GetPatientDoctorConsultationAllByIdDoctor).Methods(http.MethodGet)
 
 	// Inicialize o servidor na porta desejada
 	//http.Handle("/", c.Handler(createPatientRouter))
 	//http.Handle("/editRequestPatient", c.Handler(selectByIdPatientRouter))
-	println("Servidor ligado porta :3001!")
-	log.Fatal(http.ListenAndServe(":3001", muxRouter))
+
+	// server static files
+	fs := http.FileServer(http.Dir("./tmp"))
+	router.PathPrefix("/public/").Handler(http.StripPrefix("/public/", fs))
+
+	handler := c.Handler(router)
+
+	println("Servidor ligado na porta :3001!")
+	log.Fatal(http.ListenAndServe(":3001", handler))
 }
