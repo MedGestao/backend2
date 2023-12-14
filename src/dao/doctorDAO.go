@@ -333,7 +333,7 @@ func DoctorSelectById(doctorId int) (model.Doctor, error) {
 	}
 	defer db.Close()
 
-	sql := "select distinct on (d.cpf) d.name, d.birthdate, d.sex, d.cpf, d.address, cd.number, d.crm, d.image_url, dai.doctor_email, s.description as specialty, s.id as specialty_id d.active from doctor d " +
+	sql := "select distinct on (d.cpf) d.name, d.birthdate, d.sex, d.cpf, d.address, cd.number, d.crm, d.image_url, dai.doctor_email, s.description as specialty, s.id as specialty_id, d.active from doctor d " +
 		"left join cellphone_doctor cd on d.id = cd.doctor_id " +
 		"left join doctor_authentication_information dai on d.id = dai.doctor_id " +
 		"left join medical_specialty ms on d.id = ms.doctor_id " +

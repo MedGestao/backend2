@@ -14,7 +14,7 @@ const DateFormatMedicalSchedule = "2006-01-02 15:04:05 -0700 MST"
 
 func CreateMedicalSchedule(w http.ResponseWriter, r *http.Request) {
 
-	var medicalSchedule []request.MedicalScheduleRequest
+	var medicalSchedule request.MedicalScheduleRequest
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&medicalSchedule); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
