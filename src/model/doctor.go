@@ -96,3 +96,11 @@ func (d Doctor) GetSpecialty() Specialty {
 func (d *Doctor) SetSpecialty(specialty Specialty) {
 	d.specialty = specialty
 }
+
+func (d Doctor) GetSpecialtyId() int {
+	return d.specialty.id
+}
+
+func (d *Doctor) SetSpecialtyId(specialtyId int) {
+	d.specialty.id = specialtyId
+}

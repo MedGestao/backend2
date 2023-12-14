@@ -78,7 +78,9 @@ func DoctorSelectRegisterById(doctorId int) (response.DoctorResponse, error) {
 			CellphoneUser: cellphoneUserResponse,
 		}
 
-		specialtyUserResponse := response.SpecialtyResponse{Description: d.GetSpecialty().GetDescription()}
+		specialtyUserResponse := response.SpecialtyResponse{
+			Id:          d.GetSpecialty().GetId(),
+			Description: d.GetSpecialty().GetDescription()}
 		doctor = response.DoctorResponse{
 			User:      userResponse,
 			Crm:       d.GetCrm(),

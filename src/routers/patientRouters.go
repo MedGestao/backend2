@@ -43,20 +43,21 @@ func CreatePatient(w http.ResponseWriter, r *http.Request) {
 	// e, em seguida, retornar uma resposta adequada
 
 	// Por exemplo, retornar o paciente criado em formato JSON
-	success, err := controller.PatientRegister(patient)
+	patientId, err, errorMessage := controller.PatientRegister(patient)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	if success == true {
+	if errorMessage.Message != "" {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(errorMessage.Message)
+	} else {
+		patientIdResponse := response.PatientIdResponse{Id: patientId}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode("Paciente cadastrado com sucesso!")
-	} else {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusNotAcceptable)
-		json.NewEncoder(w).Encode("Não foi possível cadastrar o paciente!")
+		json.NewEncoder(w).Encode(patientIdResponse)
 	}
 }
 

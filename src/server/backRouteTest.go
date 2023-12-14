@@ -71,9 +71,15 @@ func OpenServerTest() {
 
 	router.HandleFunc("/api/patientDoctorConsultation/searchByDoctor/{id}", routers.GetPatientDoctorConsultationAllByIdDoctor).Methods(http.MethodGet)
 
-	// Inicialize o servidor na porta desejada
-	//http.Handle("/", c.Handler(createPatientRouter))
-	//http.Handle("/editRequestPatient", c.Handler(selectByIdPatientRouter))
+	router.HandleFunc("/api/patientDoctorConsultation/searchByPatient/{id}", routers.GetPatientDoctorConsultationAllByIdPatient).Methods(http.MethodGet)
+
+	router.HandleFunc("/api/patientDoctorConsultation/{id}", routers.GetPatientDoctorConsultationById).Methods(http.MethodGet)
+
+	router.HandleFunc("/api/patientDoctorConsultation/{id}", routers.EditPatientDoctorConsultation).Methods(http.MethodPut)
+
+	router.HandleFunc("/api/patientDoctorConsultation/completePatientDoctorConsultation/{id}", routers.CompletePatientDoctorConsultation).Methods(http.MethodGet)
+
+	router.HandleFunc("/api/patientDoctorConsultation/deactivatePatientDoctorConsultation/{id}", routers.DeactivatePatientDoctorConsultation).Methods(http.MethodGet)
 
 	// server static files
 	fs := http.FileServer(http.Dir("./tmp"))

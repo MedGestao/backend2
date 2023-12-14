@@ -3,55 +3,112 @@ package dao
 import (
 	"MedGestao/src/connection"
 	"MedGestao/src/model"
+	"MedGestao/src/response"
 	"MedGestao/src/util"
 	"database/sql"
 	"log"
 	"os"
 	"time"
+
+	"github.com/paemuri/brdoc"
 )
 
 var logger = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime)
 
-func PatientInsert(patient model.Patient) (bool, error) {
+func PatientInsert(patient model.Patient) (int, error, response.ErrorResponse) {
 	logger.Println("[DAO.PatientInsert] " + model.LogUser(patient.GetUser()))
 
 	db, err := connection.NewConnection()
-	var success bool
+	var patientId int
+	var errorMessage response.ErrorResponse
 	if err != nil {
-		return success, err
+		return patientId, err, errorMessage
 	}
 	defer db.Close()
 
 	tx, err := db.Begin()
 	if err != nil {
 		println(err)
-		return success, err
+		return patientId, err, errorMessage
 	}
 
-	sql := "insert into patient(name, birthdate, cpf, sex, address, image_url, active, registration_date)" +
+	if brdoc.IsCPF(patient.GetUser().GetCpf()) == false {
+		tx.Rollback()
+		errorMessage = response.NewErrorResponse("O CPF informado é inválido!")
+		return patientId, err, errorMessage
+	}
+
+	sql := "select exists(select id from patient where cpf=$1) as exist"
+	_, err = tx.Prepare(sql)
+	if err != nil {
+		tx.Rollback()
+		return patientId, err, errorMessage
+	}
+
+	rows, err := tx.Query(sql,
+		patient.GetUser().GetCpf())
+	if err != nil {
+		tx.Rollback()
+		return patientId, err, errorMessage
+	}
+
+	var exist bool
+	for rows.Next() {
+		err = rows.Scan(&exist)
+		if err != nil {
+			tx.Rollback()
+			return patientId, err, errorMessage
+		}
+	}
+
+	if exist == true {
+		tx.Rollback()
+		errorMessage = response.NewErrorResponse("Já existe um cadastro com esse cpf!")
+		return patientId, err, errorMessage
+	}
+
+	sql = "select exists(select id from patient_authentication_information where patient_email=$1) as exist"
+	_, err = tx.Prepare(sql)
+	if err != nil {
+		tx.Rollback()
+		return patientId, err, errorMessage
+	}
+
+	rows, err = tx.Query(sql,
+		patient.GetUser().GetEmail())
+	if err != nil {
+		tx.Rollback()
+		return patientId, err, errorMessage
+	}
+
+	for rows.Next() {
+		err = rows.Scan(&exist)
+		if err != nil {
+			tx.Rollback()
+			return patientId, err, errorMessage
+		}
+	}
+
+	if exist == true {
+		tx.Rollback()
+		errorMessage = response.NewErrorResponse("Esse e-mail já está em uso!")
+		return patientId, err, errorMessage
+	}
+
+	sql = "insert into patient(name, birthdate, cpf, sex, address, image_url, active, registration_date)" +
 		" values ($1, $2, $3, $4, $5, $6, true, current_timestamp) returning id"
 	_, err = tx.Prepare(sql)
 	if err != nil {
 		tx.Rollback()
 		println("Error1: ", err.Error())
-		return success, err
+		return patientId, err, errorMessage
 	}
-
-	println(sql)
-	//println(patient.GetUser().GetEmail())
-	//println(patient.GetUser().GetBirthDate().Date())
-	//println(patient.GetUser().GetCpf())
-	//println(patient.GetUser().GetSex())
-	//println(patient.GetUser().GetAddress())
-	//println(patient.GetUser().GetEmail())
-	//println("Telefone: ", patient.GetUser().GetCellphoneUser().GetNumber())
 
 	if err != nil {
 		println("Error geração do hash do password: ", err.Error())
 		panic(err)
 	}
 
-	var tempPatientId int
 	err = tx.QueryRow(sql,
 		patient.GetUser().GetName(),
 		string(patient.GetUser().GetBirthDate().Format("2006-01-02")),
@@ -59,31 +116,31 @@ func PatientInsert(patient model.Patient) (bool, error) {
 		patient.GetUser().GetSex(),
 		patient.GetUser().GetAddress(),
 		patient.GetUser().GetImageUrl(),
-	).Scan(&tempPatientId)
+	).Scan(&patientId)
 
 	if err != nil {
 		tx.Rollback()
 		println("Error2: ", err.Error())
-		return success, err
+		return patientId, err, errorMessage
 	}
 
 	sql = "insert into cellphone_patient(patient_id, number) values ($1, $2)"
 	_, err = tx.Prepare(sql)
 	if err != nil {
 		tx.Rollback()
-		println("Id do paciente: ", tempPatientId)
+		println("Id do paciente: ", patientId)
 		println("Error3: ", err.Error())
-		return success, err
+		return patientId, err, errorMessage
 	}
 	_, err = tx.Exec(sql,
-		tempPatientId,
+		patientId,
 		patient.GetUser().GetCellphoneUser().GetNumber(),
 	)
 	if err != nil {
 		tx.Rollback()
-		println("Id do paciente: ", tempPatientId)
+		println("Id do paciente: ", patientId)
 		println("Error4: ", err.Error())
-		return success, err
+		return patientId, err, errorMessage
 	}
 
 	passwordHashDB, saltDB, err := util.PasswordHash(patient.GetUser().GetPassword())
@@ -92,26 +149,25 @@ func PatientInsert(patient model.Patient) (bool, error) {
 	_, err = tx.Prepare(sql)
 	if err != nil {
 		tx.Rollback()
-		println("Id do paciente: ", tempPatientId)
+		println("Id do paciente: ", patientId)
 		println("Error5: ", err.Error())
-		return success, err
+		return patientId, err, errorMessage
 	}
 
 	_, err = tx.Exec(sql,
-		tempPatientId,
+		patientId,
 		patient.GetUser().GetEmail(),
 		passwordHashDB,
 		saltDB,
 	)
 	if err != nil {
-		println("Id do paciente: ", tempPatientId)
+		println("Id do paciente: ", patientId)
 		println("Error6: ", err.Error())
-		return success, err
+		return patientId, err, errorMessage
 	}
 
 	tx.Commit()
-	success = true
-	return success, nil
+	return patientId, err, errorMessage
 }
 
 func PatientValidateLogin(emailLogin string, passwordLogin string) (bool, int, error) {

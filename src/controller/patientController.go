@@ -9,12 +9,13 @@ import (
 	"os"
 )
 
-func PatientRegister(patientRequest request.PatientRequest) (bool, error) {
+func PatientRegister(patientRequest request.PatientRequest) (int, error, response.ErrorResponse) {
 
-	var success bool
+	var patientId int
 	var err error
+	var errorMessage response.ErrorResponse
 	if patientRequest.User.Name == "" {
-		return success, err
+		return patientId, err, errorMessage
 	}
 	cellPhoneUser := model.NewCellphoneUser(patientRequest.User.CellphoneUser.Number)
 	//name string, birthDate time.Time, cpf string, sex string,
@@ -25,12 +26,12 @@ func PatientRegister(patientRequest request.PatientRequest) (bool, error) {
 	logger := log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime)
 	logger.Println("[CONTROLLER.PatientRegister] " + model.LogUser(patient.GetUser()))
 
-	success, err = dao.PatientInsert(patient)
+	patientId, err, errorMessage = dao.PatientInsert(patient)
 	if err != nil {
-		return success, err
+		return patientId, err, errorMessage
 	}
 
-	return success, err
+	return patientId, err, errorMessage
 }
 
 func PatientRegisterEdit(idPatientRequest int, patientRequest request.PatientRequest) (bool, error) {

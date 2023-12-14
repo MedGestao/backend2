@@ -8,7 +8,7 @@ type PatientDoctorConsultation struct {
 	appointmentTime string
 	patientId       int
 	doctorId        int
-	status          bool
+	status          string
 	value           float64
 }
 
@@ -62,11 +62,11 @@ func (p *PatientDoctorConsultation) SetDoctorId(doctorId int) {
 	p.doctorId = doctorId
 }
 
-func (p PatientDoctorConsultation) GetStatus() bool {
+func (p PatientDoctorConsultation) GetStatus() string {
 	return p.status
 }
 
-func (p *PatientDoctorConsultation) SetStatus(status bool) {
+func (p *PatientDoctorConsultation) SetStatus(status string) {
 	p.status = status
 }
 
@@ -74,6 +74,6 @@ func (p PatientDoctorConsultation) GetValue() float64 {
 	return p.value
 }
 
-func (p *PatientDoctorConsultation) SetValue(value bool) {
-	p.status = value
+func (p *PatientDoctorConsultation) SetValue(value float64) {
+	p.value = value
 }
