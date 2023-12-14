@@ -17,11 +17,12 @@ func DoctorRegister(doctorRequest request.DoctorRequest) (int, error, response.E
 	}
 
 	cellPhoneUser := model.NewCellphoneUser(doctorRequest.User.CellphoneUser.Number)
-	specialty := model.NewSpecialty(doctorRequest.Specialty.Description)
+	//specialty := model.NewSpecialty(doctorRequest.Specialty.Description)
 
 	doctor := model.NewDoctor(doctorRequest.User.Name, doctorRequest.User.BirthDate, doctorRequest.User.Cpf,
 		doctorRequest.User.Sex, doctorRequest.User.Address, doctorRequest.User.Email, cellPhoneUser, doctorRequest.User.Password,
-		doctorRequest.User.ImageUrl, doctorRequest.Crm, specialty)
+		doctorRequest.User.ImageUrl, doctorRequest.Crm, model.Specialty{})
+	doctor.SetSpecialtyId(doctorRequest.Specialty.Id)
 
 	doctorId, err, errorMessage = dao.InsertDoctor(doctor)
 	if err != nil {
@@ -78,7 +79,9 @@ func DoctorSelectRegisterById(doctorId int) (response.DoctorResponse, error) {
 			CellphoneUser: cellphoneUserResponse,
 		}
 
-		specialtyUserResponse := response.SpecialtyResponse{Description: d.GetSpecialty().GetDescription()}
+		specialtyUserResponse := response.SpecialtyResponse{
+			Id:          d.GetSpecialty().GetId(),
+			Description: d.GetSpecialty().GetDescription()}
 		doctor = response.DoctorResponse{
 			User:      userResponse,
 			Crm:       d.GetCrm(),
@@ -101,11 +104,12 @@ func DoctorRegisterEdit(idDoctorRequest int, doctorRequest request.DoctorRequest
 	}
 
 	cellPhoneUser := model.NewCellphoneUser(doctorRequest.User.CellphoneUser.Number)
-	specialty := model.NewSpecialty(doctorRequest.Specialty.Description)
+	//specialty := model.NewSpecialty(doctorRequest.Specialty.Description)
 
 	doctor := model.NewDoctor(doctorRequest.User.Name, doctorRequest.User.BirthDate, doctorRequest.User.Cpf,
 		doctorRequest.User.Sex, doctorRequest.User.Address, doctorRequest.User.Email, cellPhoneUser, doctorRequest.User.Password,
-		doctorRequest.User.ImageUrl, doctorRequest.Crm, specialty)
+		doctorRequest.User.ImageUrl, doctorRequest.Crm, model.Specialty{})
+	doctor.SetSpecialtyId(doctorRequest.Specialty.Id)
 
 	success, err = dao.DoctorEdit(idDoctorRequest, doctor)
 	if err != nil {

@@ -6,6 +6,7 @@ import (
 	"MedGestao/src/response"
 	"MedGestao/src/util"
 	"database/sql"
+	"github.com/paemuri/brdoc"
 	"time"
 )
 
@@ -27,7 +28,42 @@ func InsertDoctor(doctor model.Doctor) (int, error, response.ErrorResponse) {
 		return doctorId, err, errorMessage
 	}
 
-	sql := "insert into doctor(name, birthdate, cpf, sex, address, crm, image_url, active, registration_date)" +
+	if brdoc.IsCPF(doctor.GetUser().GetCpf()) == false {
+		tx.Rollback()
+		errorMessage = response.NewErrorResponse("O CPF informado é inválido!")
+		return doctorId, err, errorMessage
+	}
+
+	sql := "select exists(select id from doctor where cpf=$1) as exist"
+	_, err = tx.Prepare(sql)
+	if err != nil {
+		tx.Rollback()
+		return doctorId, err, errorMessage
+	}
+
+	rows, err := tx.Query(sql,
+		doctor.GetUser().GetCpf())
+	if err != nil {
+		tx.Rollback()
+		return doctorId, err, errorMessage
+	}
+
+	var exist bool
+	for rows.Next() {
+		err = rows.Scan(&exist)
+		if err != nil {
+			tx.Rollback()
+			return doctorId, err, errorMessage
+		}
+	}
+
+	if exist == true {
+		tx.Rollback()
+		errorMessage = response.NewErrorResponse("Já existe um cadastro com esse cpf!")
+		return doctorId, err, errorMessage
+	}
+
+	sql = "insert into doctor(name, birthdate, cpf, sex, address, crm, image_url, active, registration_date)" +
 		" values ($1, $2, $3, $4, $5, $6, $7, true, current_timestamp) returning id"
 	_, err = tx.Prepare(sql)
 	if err != nil {
@@ -80,16 +116,17 @@ func InsertDoctor(doctor model.Doctor) (int, error, response.ErrorResponse) {
 	sql = "insert into medical_specialty(doctor_id, specialty_id) values($1, $2)"
 	_, err = tx.Prepare(sql)
 	if err != nil {
+		tx.Rollback()
 		println("Error5: ", err.Error())
 		return doctorId, err, errorMessage
 	}
 
 	_, err = tx.Exec(sql,
 		tempDoctorId,
-		//doctor.GetSpecialty().GetId()
-		1,
+		doctor.GetSpecialty().GetId(),
 	)
 	if err != nil {
+		tx.Rollback()
 		println("Error6: ", err.Error())
 		return doctorId, err, errorMessage
 	}
@@ -101,13 +138,12 @@ func InsertDoctor(doctor model.Doctor) (int, error, response.ErrorResponse) {
 		return doctorId, err, errorMessage
 	}
 
-	var exists bool
 	err = tx.QueryRow(sql,
-		doctor.GetUser().GetEmail()).Scan(&exists)
+		doctor.GetUser().GetEmail()).Scan(&exist)
 	if err != nil {
 		tx.Rollback()
 		return doctorId, err, errorMessage
-	} else if exists == true {
+	} else if exist == true {
 		tx.Rollback()
 		errorMessage = response.NewErrorResponse("Esse e-mail já está em uso!")
 		return doctorId, err, errorMessage
@@ -131,6 +167,7 @@ func InsertDoctor(doctor model.Doctor) (int, error, response.ErrorResponse) {
 		saltDB,
 	)
 	if err != nil {
+		tx.Rollback()
 		println("Id do médico: ", tempDoctorId)
 		println("Error8: ", err.Error())
 		return doctorId, err, errorMessage
@@ -208,8 +245,8 @@ func DoctorSelectAll(doctorName string, specialtyDescription string) ([]response
 	if specialtyDescription != "" {
 		sql = "select distinct on (d.cpf) d.id, d.name, d.image_url, s.id, s.description as specialty from doctor d " +
 			"left join medical_specialty ms on d.id = ms.doctor_id " +
-			"left join specialty s on ms.specialty_id = s.id where d.active is true and d.image_url is not null" +
-			" and s.description like '%' || $1 || '%'"
+			"left join specialty s on ms.specialty_id = s.id where d.active is true and d.image_url is not null " +
+			"and s.description like '%' || $1 || '%'"
 	}
 	_, err = db.Prepare(sql)
 	if err != nil {
@@ -296,7 +333,7 @@ func DoctorSelectById(doctorId int) (model.Doctor, error) {
 	}
 	defer db.Close()
 
-	sql := "select distinct on (d.cpf) d.name, d.birthdate, d.sex, d.cpf, d.address, cd.number, d.crm, d.image_url, dai.doctor_email, s.description as specialty, d.active from doctor d " +
+	sql := "select distinct on (d.cpf) d.name, d.birthdate, d.sex, d.cpf, d.address, cd.number, d.crm, d.image_url, dai.doctor_email, s.id, s.description as specialty, d.active from doctor d " +
 		"left join cellphone_doctor cd on d.id = cd.doctor_id " +
 		"left join doctor_authentication_information dai on d.id = dai.doctor_id " +
 		"left join medical_specialty ms on d.id = ms.doctor_id " +
@@ -306,6 +343,7 @@ func DoctorSelectById(doctorId int) (model.Doctor, error) {
 		println("Error3: ", err.Error())
 	}
 
+	var doctorSpecialtyIdDB int
 	var doctorNameDB,
 		doctorSexDB,
 		doctorCpfDB,
@@ -331,6 +369,7 @@ func DoctorSelectById(doctorId int) (model.Doctor, error) {
 			&doctorCrm,
 			&doctorImageUrlDB,
 			&doctorEmailDB,
+			&doctorSpecialtyIdDB,
 			&doctorSpecialtyDB,
 			&doctorActiveDB)
 		if err != nil {
@@ -339,13 +378,14 @@ func DoctorSelectById(doctorId int) (model.Doctor, error) {
 		}
 	}
 	doctor = model.NewDoctor(doctorNameDB, doctorBirthdateDB, doctorCpfDB, doctorSexDB, doctorAddressDB, doctorEmailDB, model.NewCellphoneUser(doctorNumberDB), "", doctorImageUrlDB, doctorCrm, model.NewSpecialty(doctorSpecialtyDB))
+	doctor.SetSpecialtyId(doctorSpecialtyIdDB)
 	doctor.SetUserActive(doctorActiveDB)
 
 	return doctor, nil
 
 }
 
-func DoctorEdit(idDoctor int, doctor model.Doctor) (bool, error) {
+func DoctorEdit(doctorId int, doctor model.Doctor) (bool, error) {
 	db, err := connection.NewConnection()
 	success := false
 	if err != nil {
@@ -377,7 +417,7 @@ func DoctorEdit(idDoctor int, doctor model.Doctor) (bool, error) {
 		doctor.GetUser().GetAddress(),
 		doctor.GetCrm(),
 		doctor.GetUser().GetImageUrl(),
-		idDoctor)
+		doctorId)
 	if err != nil {
 		tx.Rollback()
 		println("Error3: ", err.Error())
@@ -394,17 +434,35 @@ func DoctorEdit(idDoctor int, doctor model.Doctor) (bool, error) {
 
 	_, err = tx.Exec(sql,
 		doctor.GetUser().GetCellphoneUser().GetNumber(),
-		idDoctor)
+		doctorId)
 	if err != nil {
 		tx.Rollback()
 		println("Error5: ", err.Error())
 		return success, err
 	}
 
+	sql = "update medical_specialty set specialty_id = $1 where doctor_id=$2"
+	_, err = tx.Prepare(sql)
+	if err != nil {
+		tx.Rollback()
+		println("Error5: ", err.Error())
+		return success, err
+	}
+
+	_, err = tx.Exec(sql,
+		doctor.GetSpecialty().GetId(),
+		doctorId,
+	)
+	if err != nil {
+		tx.Rollback()
+		println("Error6: ", err.Error())
+		return success, err
+	}
+
 	if (doctor.GetUser().GetEmail() == "") || (doctor.GetUser().GetPassword() == "") {
 		tx.Commit()
 	} else {
-		err = DoctorEditLogin(doctor.GetUser().GetEmail(), doctor.GetUser().GetPassword(), idDoctor, tx)
+		err = DoctorEditLogin(doctor.GetUser().GetEmail(), doctor.GetUser().GetPassword(), doctorId, tx)
 		if err != nil {
 			tx.Rollback()
 			println("Error 6: ", err.Error())
