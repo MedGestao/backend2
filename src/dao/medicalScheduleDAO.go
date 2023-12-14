@@ -99,15 +99,23 @@ func MedicalScheduleInsert(medicalSchedule model.MedicalSchedule) (bool, error, 
 	return success, err, errorMessage
 }
 
-func MedicalScheduleSelectAllByIdDoctor(doctorId int) ([]model.MedicalSchedule, error) {
+func MedicalScheduleSelectAllByIdDoctor(doctorId int, selectedDate time.Time, selectedDay string) ([]model.MedicalSchedule, error) {
 	var medicalSchedule model.MedicalSchedule
 	var medicalScheduleList []model.MedicalSchedule
+
 	db, err := connection.NewConnection()
 	if err != nil {
 		return medicalScheduleList, err
 	}
 	defer db.Close()
-	sql := "select id, doctor_id, day_of_service, period_1, period_2, specific_date, year, query_value, schedule_limit from medical_schedule where doctor_id = $1 and active is true"
+
+	hasAvailablePeriods, _ := hasAvailablePeriods(doctorId, selectedDate, selectedDay)
+
+	if !hasAvailablePeriods {
+		return medicalScheduleList, err
+	}
+
+	sql := "select s.id, s.doctor_id, s.day_of_service, s.period_1, s.period_2, s.specific_date, s.query_value, s.schedule_limit from medical_schedule s inner join patient_doctor_consultation c on c.doctor_id = s.doctor_id where s.doctor_id = $1 and s.day_of_service = $2 and s.active is true"
 
 	_, err = db.Prepare(sql)
 	if err != nil {
@@ -115,7 +123,7 @@ func MedicalScheduleSelectAllByIdDoctor(doctorId int) ([]model.MedicalSchedule, 
 	}
 
 	rows, err := db.Query(sql,
-		doctorId)
+		doctorId, selectedDay)
 	if err != nil {
 		return medicalScheduleList, err
 	}
@@ -127,7 +135,7 @@ func MedicalScheduleSelectAllByIdDoctor(doctorId int) ([]model.MedicalSchedule, 
 	var strValue string
 	var specificDateNull sql2.NullTime
 	for rows.Next() {
-		err = rows.Scan(&idDB, &doctorIdDB, &dayOfServiceDB, &period1DB, &period2DB, &specificDateNull, &yearDB, &strValue, &scheduleLimitDB)
+		err = rows.Scan(&idDB, &doctorIdDB, &dayOfServiceDB, &period1DB, &period2DB, &specificDateNull, &strValue, &scheduleLimitDB)
 		if err != nil {
 			return medicalScheduleList, err
 		}
@@ -288,4 +296,59 @@ func MedicalScheduleDelete(medicalScheduleId int) (bool, error) {
 
 	success = true
 	return success, err
+}
+
+func hasAvailablePeriods(doctorId int, selectedDate time.Time, selectedDay string) (bool, error) {
+	db, err := connection.NewConnection()
+	if err != nil {
+		return false, err
+	}
+	defer db.Close()
+
+	sql := "select count(id) as appointments from patient_doctor_consultation where appointment_date = $1 and doctor_id = $2"
+
+	_, err = db.Prepare(sql)
+	if err != nil {
+		return false, err
+	}
+
+	rows, err := db.Query(sql, selectedDate, doctorId)
+	if err != nil {
+		return false, err
+	}
+
+	var appointments int
+	for rows.Next() {
+		err = rows.Scan(&appointments)
+		if err != nil {
+			return false, err
+		}
+	}
+
+	sql = "select schedule_limit from medical_schedule where day_of_service = $1 and doctor_id = $2"
+
+	_, err = db.Prepare(sql)
+	if err != nil {
+		return false, err
+	}
+
+	rows, err = db.Query(sql, selectedDay, doctorId)
+	if err != nil {
+		return false, err
+	}
+
+	var scheduleLimit int
+	for rows.Next() {
+		err = rows.Scan(&scheduleLimit)
+		if err != nil {
+			return false, err
+		}
+	}
+
+	if appointments >= scheduleLimit {
+		return false, err
+	} else {
+		return true, err
+	}
+
 }

@@ -5,10 +5,16 @@ import (
 	"MedGestao/src/model"
 	"MedGestao/src/util"
 	"database/sql"
+	"log"
+	"os"
 	"time"
 )
 
+var logger = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime)
+
 func PatientInsert(patient model.Patient) (bool, error) {
+	logger.Println("[DAO.PatientInsert] " + model.LogUser(patient.GetUser()))
+
 	db, err := connection.NewConnection()
 	var success bool
 	if err != nil {

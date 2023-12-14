@@ -5,6 +5,7 @@ import (
 	"MedGestao/src/model"
 	"MedGestao/src/request"
 	"MedGestao/src/response"
+	"time"
 )
 
 func RegisterMedicalSchedule(medicalScheduleRequest []request.MedicalScheduleRequest) (bool, error, response.ErrorResponse) {
@@ -31,7 +32,7 @@ func RegisterMedicalSchedule(medicalScheduleRequest []request.MedicalScheduleReq
 	return success, err, errorMessage
 }
 
-func SearchAllMedicalScheduleByIdDoctor(doctorId int) ([]response.MedicalScheduleResponse, error) {
+func SearchAllMedicalScheduleByIdDoctor(doctorId int, selectedDate time.Time, selectedDay string) ([]response.MedicalScheduleResponse, error) {
 	var m []model.MedicalSchedule
 	var medicalScheduleList []response.MedicalScheduleResponse
 	var err error
@@ -39,7 +40,7 @@ func SearchAllMedicalScheduleByIdDoctor(doctorId int) ([]response.MedicalSchedul
 	if doctorId == 0 {
 		return medicalScheduleList, err
 	}
-	m, err = dao.MedicalScheduleSelectAllByIdDoctor(doctorId)
+	m, err = dao.MedicalScheduleSelectAllByIdDoctor(doctorId, selectedDate, selectedDay)
 	if err != nil {
 		return medicalScheduleList, err
 	}

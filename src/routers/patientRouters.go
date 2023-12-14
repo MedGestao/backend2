@@ -6,14 +6,19 @@ import (
 	"MedGestao/src/response"
 	"MedGestao/src/util"
 	"encoding/json"
+	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
 )
 
+var logger = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime)
+
 func CreatePatient(w http.ResponseWriter, r *http.Request) {
+
 	// Decodifica os dados JSON do corpo da solicitação
 	//var patient model.Patient
 	var patient request.PatientRequest
@@ -31,9 +36,8 @@ func CreatePatient(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	println("Email do paciente: ", patient.User.Email)
-	println("Telefone do paciente: ", patient.User.CellphoneUser.Number)
-	println("Data de nascimento:", patient.User.BirthDate.String())
+
+	logger.Println("[ROUTER.CreatePatient] " + request.LogUserRequest(patient.User))
 
 	// Aqui, você pode realizar a lógica de negócios para criar o paciente no banco de dados
 	// e, em seguida, retornar uma resposta adequada

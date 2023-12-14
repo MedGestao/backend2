@@ -58,11 +58,12 @@ func CreateDoctor(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetDoctorsAll(w http.ResponseWriter, r *http.Request) {
-	var doctorFilterParameters request.DoctorFilterParameters
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&doctorFilterParameters); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+	doctorName := mux.Vars(r)["doctorName"]
+	specialtyName := mux.Vars(r)["specialtyName"]
+
+	doctorFilterParameters := request.DoctorFilterParameters{
+		DoctorName:    doctorName,
+		SpecialtyName: specialtyName,
 	}
 
 	doctors, err := controller.DoctorSelectRegisterAll(doctorFilterParameters.DoctorName, doctorFilterParameters.SpecialtyName)
@@ -78,32 +79,32 @@ func GetDoctorsAll(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetDoctorById(w http.ResponseWriter, r *http.Request) {
-	/* 	params := mux.Vars(r)
-	   	// Decodifica os dados JSON do corpo da solicitação
-	   	id := params["id"]
-	   	if id == "" {
-	   		http.Error(w, "Id não foi informado", http.StatusBadRequest)
-	   		return
-	   	}
+	params := mux.Vars(r)
+	// Decodifica os dados JSON do corpo da solicitação
+	id := params["id"]
+	if id == "" {
+		http.Error(w, "Id não foi informado", http.StatusBadRequest)
+		return
+	}
 
-	   	doctorId, err := strconv.Atoi(id)
-	   	if err != nil {
-	   		http.Error(w, err.Error(), http.StatusInternalServerError)
-	   		return
-	   	}
+	doctorId, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-	   	// Chama a função que lê o paciente do banco de dados
-	   	doctor, err := controller.DoctorSelectRegisterById(doctorId)
-	   	if err != nil {
-	   		http.Error(w, err.Error(), http.StatusInternalServerError)
-	   		return
-	   	}
+	// Chama a função que lê o paciente do banco de dados
+	doctor, err := controller.DoctorSelectRegisterById(doctorId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-	   	// Retorna os dados do paciente no formato JSON
-	   	w.Header().Set("Content-Type", "application/json")
-	   	json.NewEncoder(w).Encode(doctor)
-	   	w.WriteHeader(http.StatusOK) */
-	var doctor response.DoctorResponse
+	// Retorna os dados do paciente no formato JSON
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(doctor)
+	w.WriteHeader(http.StatusOK)
+	/* var doctor response.DoctorResponse
 
 	cellphoneUserResponse := response.CellphoneResponse{
 		Number: "1223",
@@ -124,7 +125,7 @@ func GetDoctorById(w http.ResponseWriter, r *http.Request) {
 	// Retorna os dados do paciente no formato JSON
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(doctor)
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusOK) */
 }
 
 func EditDoctor(w http.ResponseWriter, r *http.Request) {

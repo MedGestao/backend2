@@ -64,7 +64,7 @@ func UploadFile(w http.ResponseWriter, r *http.Request) {
 	tempFile.Write(fileBytes)
 	defer tempFile.Close()
 
-	basePath := "http://localhost:3001/public/" + filepath.Base(tempFile.Name())
+	basePath := os.Getenv("HOST") + "/public/" + filepath.Base(tempFile.Name())
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)

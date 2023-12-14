@@ -39,7 +39,7 @@ func OpenServerTest() {
 	//DOCTOR ROUTERS
 	router.HandleFunc("/api/doctors", routers.CreateDoctor).Methods(http.MethodPost)
 
-	router.HandleFunc("/api/doctors/selectAll", routers.GetDoctorsAll).Methods(http.MethodPost)
+	router.HandleFunc("/api/doctors", routers.GetDoctorsAll).Methods(http.MethodGet)
 
 	router.HandleFunc("/api/doctors/{id}", routers.GetDoctorById).Methods(http.MethodGet)
 
@@ -58,7 +58,9 @@ func OpenServerTest() {
 	//MEDICAL SCHEDULE ROUTERS
 	router.HandleFunc("/api/doctors/schedule", routers.CreateMedicalSchedule).Methods(http.MethodPost)
 
-	router.HandleFunc("/api/medicalSchedule/listSchedules/{id}", routers.GetMedicalScheduleAllByIdDoctor).Methods(http.MethodGet)
+	router.HandleFunc("/api/doctors/{id}/schedule", routers.GetMedicalScheduleAllByIdDoctor).
+		Queries("selectedDate", "{selectedDate}", "selectedDay", "{selectedDay}").
+		Methods(http.MethodGet)
 
 	router.HandleFunc("/api/medicalSchedule/{id}", routers.GetMedicalScheduleById).Methods(http.MethodGet)
 
