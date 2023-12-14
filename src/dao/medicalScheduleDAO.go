@@ -19,7 +19,9 @@ func MedicalScheduleInsert(medicalSchedule model.MedicalSchedule) (bool, error, 
 	}
 	defer db.Close()
 
-	sql := "select exists(select id from medical_schedule where doctor_id=$1) as exist "
+	var sql string
+
+	/* sql := "select exists(select id from medical_schedule where doctor_id=$1) as exist "
 	if err != err {
 		return success, err, errorMessage
 	}
@@ -40,16 +42,16 @@ func MedicalScheduleInsert(medicalSchedule model.MedicalSchedule) (bool, error, 
 		if err != nil {
 			return success, err, errorMessage
 		}
-	}
+	} */
 
-	if existDB == true {
+	/* 	if existDB == true {
 		errorMessage = response.NewErrorResponse("Você já possui uma agenda cadastrada. Caso necessário edite a sua agenda!")
 		return success, err, errorMessage
-	}
+	} */
 
 	if medicalSchedule.GetSpecificDate().IsZero() {
-		sql = "insert into medical_schedule(doctor_id, day_of_service, period_1, period_2, year, active, " +
-			"registration_date, query_value, schedule_limit) values($1, $2, $3, $4, $5, true, current_timestamp, $6, $7)"
+		sql = "insert into medical_schedule(doctor_id, day_of_service, period_1, period_2, active, " +
+			"registration_date, query_value, schedule_limit) values($1, $2, $3, $4, true, current_timestamp, $5, $6)"
 		if err != err {
 			return success, err, errorMessage
 		}
@@ -63,7 +65,6 @@ func MedicalScheduleInsert(medicalSchedule model.MedicalSchedule) (bool, error, 
 			medicalSchedule.GetDayOfService(),
 			medicalSchedule.GetPeriod1(),
 			medicalSchedule.GetPeriod2(),
-			medicalSchedule.GetYear(),
 			medicalSchedule.GetQueryValue(),
 			medicalSchedule.GetScheduleLimit())
 		if err != nil {

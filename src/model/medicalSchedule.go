@@ -61,14 +61,6 @@ func (m *MedicalSchedule) SetDayOfService(dayOfService string) {
 	m.dayOfService = dayOfService
 }
 
-func (m MedicalSchedule) GetSpecificDate() time.Time {
-	return m.specificDate
-}
-
-func (m *MedicalSchedule) SetSpecificTime(specificDate time.Time) {
-	m.specificDate = specificDate
-}
-
 func (m MedicalSchedule) GetPeriod1() string {
 	return m.period1
 }
@@ -107,4 +99,12 @@ func (m MedicalSchedule) IsActive() bool {
 
 func (m *MedicalSchedule) SetActive(active bool) {
 	m.active = active
+}
+
+func (m MedicalSchedule) GetSpecificDate() time.Time {
+	return m.specificDate
+}
+
+func (m *MedicalSchedule) SetSpecificDate(specificDate time.Time) {
+	m.specificDate = specificDate
 }

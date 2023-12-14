@@ -1,7 +1,8 @@
 package request
 
-type SpecialtyIdRequest struct {
-	Id int `json:"id,omitempty"`
+type SpecialtyRequest struct {
+	ID          int    `json:"id"`
+	Description string `json:"description,omitempty"`
 }
 
 //type EditSpecialtyRequest struct {
@@ -10,9 +11,9 @@ type SpecialtyIdRequest struct {
 //}
 
 type DoctorRequest struct {
-	User      UserRequest        `json:"user"`
-	Crm       string             `json:"crm"`
-	Specialty SpecialtyIdRequest `json:"specialty"`
+	User      UserRequest      `json:"user"`
+	Crm       string           `json:"crm"`
+	Specialty SpecialtyRequest `json:"specialty"`
 }
 
 type DoctorIdRequest struct {

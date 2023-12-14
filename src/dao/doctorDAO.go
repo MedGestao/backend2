@@ -333,7 +333,7 @@ func DoctorSelectById(doctorId int) (model.Doctor, error) {
 	}
 	defer db.Close()
 
-	sql := "select distinct on (d.cpf) d.name, d.birthdate, d.sex, d.cpf, d.address, cd.number, d.crm, d.image_url, dai.doctor_email, s.id, s.description as specialty, d.active from doctor d " +
+	sql := "select distinct on (d.cpf) d.name, d.birthdate, d.sex, d.cpf, d.address, cd.number, d.crm, d.image_url, dai.doctor_email, s.description as specialty, s.id as specialty_id d.active from doctor d " +
 		"left join cellphone_doctor cd on d.id = cd.doctor_id " +
 		"left join doctor_authentication_information dai on d.id = dai.doctor_id " +
 		"left join medical_specialty ms on d.id = ms.doctor_id " +
@@ -343,7 +343,6 @@ func DoctorSelectById(doctorId int) (model.Doctor, error) {
 		println("Error3: ", err.Error())
 	}
 
-	var doctorSpecialtyIdDB int
 	var doctorNameDB,
 		doctorSexDB,
 		doctorCpfDB,
@@ -356,6 +355,7 @@ func DoctorSelectById(doctorId int) (model.Doctor, error) {
 	var doctorBirthdateDB time.Time
 	var doctorActiveDB bool
 	var doctor model.Doctor
+	var doctorSpecialtyId int
 	rows, err := db.Query(sql, doctorId)
 
 	for rows.Next() {
@@ -369,16 +369,16 @@ func DoctorSelectById(doctorId int) (model.Doctor, error) {
 			&doctorCrm,
 			&doctorImageUrlDB,
 			&doctorEmailDB,
-			&doctorSpecialtyIdDB,
 			&doctorSpecialtyDB,
+			&doctorSpecialtyId,
 			&doctorActiveDB)
 		if err != nil {
 			println("Error nos dados retornados: ", err.Error())
 			return doctor, err
 		}
 	}
-	doctor = model.NewDoctor(doctorNameDB, doctorBirthdateDB, doctorCpfDB, doctorSexDB, doctorAddressDB, doctorEmailDB, model.NewCellphoneUser(doctorNumberDB), "", doctorImageUrlDB, doctorCrm, model.NewSpecialty(doctorSpecialtyDB))
-	doctor.SetSpecialtyId(doctorSpecialtyIdDB)
+	doctor = model.NewDoctor(doctorNameDB, doctorBirthdateDB, doctorCpfDB, doctorSexDB, doctorAddressDB, doctorEmailDB, model.NewCellphoneUser(doctorNumberDB), "", doctorImageUrlDB, doctorCrm,
+		model.NewSpecialty(doctorSpecialtyId, doctorSpecialtyDB))
 	doctor.SetUserActive(doctorActiveDB)
 
 	return doctor, nil
@@ -525,4 +525,79 @@ func DoctorOff(doctorId int) (bool, error) {
 
 	success = true
 	return success, err
+}
+
+func SelectSpecialties() ([]response.SpecialtyResponse, error) {
+	db, err := connection.NewConnection()
+	if err != nil {
+		println("Error1: ", err.Error())
+	}
+	defer db.Close()
+
+	sql := "select id, description from specialty"
+	_, err = db.Prepare(sql)
+	if err != nil {
+		println("Error3: ", err.Error())
+	}
+
+	var id int
+	var description string
+
+	var specialties []response.SpecialtyResponse
+	rows, err := db.Query(sql)
+	if err != nil {
+		println("Error nos dados retornados: ", err.Error())
+		return specialties, err
+	}
+
+	for rows.Next() {
+		err = rows.Scan(&id, &description)
+		if err != nil {
+			println("Error nos dados retornados: ", err.Error())
+			return specialties, err
+		}
+		specialty := response.SpecialtyResponse{
+			Id:          id,
+			Description: description,
+		}
+		specialties = append(specialties, specialty)
+	}
+
+	return specialties, nil
+
+}
+
+func ValidateEmailDoctor(email string) (bool, error) {
+	db, err := connection.NewConnection()
+	defer db.Close()
+	if err != nil {
+		return false, err
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		println(err)
+		return false, err
+	}
+
+	sql := "select exists (select id from doctor_authentication_information where doctor_email=$1) as ex"
+	_, err = tx.Prepare(sql)
+	if err != nil {
+		tx.Rollback()
+		return false, err
+	}
+
+	var exists bool
+	err = tx.QueryRow(sql, email).Scan(&exists)
+	if err != nil {
+		tx.Rollback()
+		return false, err
+	}
+
+	if exists == true {
+		tx.Rollback()
+		return false, err
+	}
+
+	return true, err
 }

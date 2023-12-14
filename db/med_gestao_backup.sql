@@ -213,14 +213,16 @@ CREATE TABLE public.medical_schedule (
     id integer NOT NULL,
     doctor_id integer,
     specific_date date,
-    start_time character varying(5),
-    final_time character varying(5),
+    period_1 character varying(15),
+    period_2 character varying(15),
     specific_time character varying(5),
     day_of_service character varying(2),
     active boolean,
     registration_date timestamp without time zone,
     last_modified_date timestamp without time zone,
-    year character varying(4)
+    year character varying(4),
+    query_value money,
+    schedule_limit integer
 );
 
 
@@ -341,21 +343,21 @@ ALTER SEQUENCE public.patient_authentication_information_id_seq OWNED BY public.
 
 
 --
--- Name: patient_doctor_schedule; Type: TABLE; Schema: public; Owner: postgres
+-- Name: patient_doctor_consultation; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.patient_doctor_schedule (
+CREATE TABLE public.patient_doctor_consultation (
     id integer NOT NULL,
     patient_id integer,
     doctor_id integer,
-    appointed_date date,
-    appointed_time character varying(2),
-    status character(1),
-    medical_schedule_id integer
+    appointment_date date,
+    appointment_time character varying(15),
+    status boolean,
+    value money
 );
 
 
-ALTER TABLE public.patient_doctor_schedule OWNER TO postgres;
+ALTER TABLE public.patient_doctor_consultation OWNER TO postgres;
 
 --
 -- Name: patient_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
@@ -398,7 +400,7 @@ ALTER TABLE public.patient_medico_schedule_id_seq OWNER TO postgres;
 -- Name: patient_medico_schedule_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
-ALTER SEQUENCE public.patient_medico_schedule_id_seq OWNED BY public.patient_doctor_schedule.id;
+ALTER SEQUENCE public.patient_medico_schedule_id_seq OWNED BY public.patient_doctor_consultation.id;
 
 
 --
@@ -535,10 +537,10 @@ ALTER TABLE ONLY public.patient_authentication_information ALTER COLUMN id SET D
 
 
 --
--- Name: patient_doctor_schedule id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: patient_doctor_consultation id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.patient_doctor_schedule ALTER COLUMN id SET DEFAULT nextval('public.patient_medico_schedule_id_seq'::regclass);
+ALTER TABLE ONLY public.patient_doctor_consultation ALTER COLUMN id SET DEFAULT nextval('public.patient_medico_schedule_id_seq'::regclass);
 
 
 --
@@ -568,6 +570,9 @@ COPY public.cellphone_doctor (id, doctor_id, number) FROM stdin;
 9	9	8299472294
 12	12	8299472294
 10	10	8299472294
+13	13	8299472294
+14	14	8299472294
+15	15	8299472294
 \.
 
 
@@ -600,6 +605,8 @@ COPY public.cellphone_patient (id, patient_id, number) FROM stdin;
 31	43	8299472294
 32	44	8299472294
 29	41	8299472294
+33	45	8299472294
+34	46	8299472294
 \.
 
 
@@ -631,6 +638,9 @@ COPY public.doctor (id, name, birthdate, cpf, sex, address, crm, active, registr
 9	teste1	2004-12-13	00100100102	M	Rua Carlos Augusto	12345	t	\N	\N	\N
 12	teste2	2004-12-13	00100100102	M	Rua Carlos Augusto	12345	t	2023-11-23 17:52:38.622448	\N	https://th.bing.com/th/id/OIP.p3KbIWXio_vIB09Tzt--lQHaIB?w=179&h=194&c=7&r=0&o=5&dpr=1.3&pid=1.7
 10	teste2Atualizado	2004-12-13	00100100102	F	Rua Carlos Augusto	12345	f	2023-11-23 14:46:17.617648	2023-11-23 17:55:38.467323	https://th.bing.com/th/id/OIP.p3KbIWXio_vIB09Tzt--lQHaIB?w=179&h=194&c=7&r=0&o=5&dpr=1.3&pid=1.7
+13	teste3Atualizado2	1992-09-22	00100100102	M	Rua Carlos Augusto2	23238	f	2023-12-05 04:46:48.069316	2023-12-05 23:27:40.898727	https://th.bing.com/th/id/OIP.p3KbIWXio_vIB09Tzt--lQHaIB?w=179&h=194&c=7&r=0&o=5&dpr=1.3&pid=1.7
+14	teste4	2004-12-13	00100100102	M	Rua Carlos Augusto	12345	t	2023-12-06 00:25:57.575684	\N	https://th.bing.com/th/id/OIP.p3KbIWXio_vIB09Tzt--lQHaIB?w=179&h=194&c=7&r=0&o=5&dpr=1.3&pid=1.7
+15	teste5	2004-12-13	00100100102	M	Rua Carlos Augusto	12345	t	2023-12-06 00:30:36.077068	\N	https://th.bing.com/th/id/OIP.p3KbIWXio_vIB09Tzt--lQHaIB?w=179&h=194&c=7&r=0&o=5&dpr=1.3&pid=1.7
 \.
 
 
@@ -647,6 +657,9 @@ COPY public.doctor_authentication_information (id, doctor_id, doctor_email, doct
 8	9	teste1@gmail.com	\\x7bf4b524baaa3b397bf9b13064963c9a6610b08e78dab4b79536f3ee59d259db	\\x163104abe9c3e721fc9fb0303c991f2ca89c5a9bbe734d0fc2cb2b40b67946f6
 11	12	teste2@gmail.com	\\x86125aac1182fa62221462ae2d885a321618281874d05a4a76be3a7bfd8e6a3d	\\x6c801cafc88411bec4a2d7cf49557b510479e8f3c883633f179a7dd8c5ef539d
 9	10	teste2Atualizado@gmail.com	\\x05e0816fa2d5dbae264332efb6e80fdbe4fd3906161d5eacee54233cc8ebd269	\\xf49a227b629867a0bb3426b9f38ba8f793168f5c15e76be28a9f28054c7618f8
+12	13	teste3Atualizado2@gmail.com	\\xff54218ddba597c5910da0c3661a4418a95ecae16778f6ad01d44b2d785db17f	\\x1c155db9468f4da3c089c5ac9ccc00b65a70263ce3a2da6ebf6f6a0e1bc3db9b
+13	14	teste4@gmail.com	\\x433c675f457faf52a25125043075cfe3d960f71e640cf532e7b6ad41dbc565c5	\\x894495e3d37e0709fd127cc86590fa3781308fde23bbede47fc8b7c4e8723a2a
+14	15	teste5@gmail.com	\\x133a6a7dc76a482f31296eaca9bbdad344ca21c34deb1997db4af84a62294fad	\\x30688c291e4436c8342ba87fc665537eb6e8aa61ca4b4cf270d7145f5fabe277
 \.
 
 
@@ -654,9 +667,20 @@ COPY public.doctor_authentication_information (id, doctor_id, doctor_email, doct
 -- Data for Name: medical_schedule; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.medical_schedule (id, doctor_id, specific_date, start_time, final_time, specific_time, day_of_service, active, registration_date, last_modified_date, year) FROM stdin;
-2	7	\N	08:00	15:00		05	t	2023-11-19 01:57:31.360197	2023-11-19 17:02:37.49946	2023
-1	5	\N	09:00	17:00		03	f	2023-11-19 01:44:12.771322	2023-11-19 17:11:58.539025	2023
+COPY public.medical_schedule (id, doctor_id, specific_date, period_1, period_2, specific_time, day_of_service, active, registration_date, last_modified_date, year, query_value, schedule_limit) FROM stdin;
+4	10	\N	8:30	16:00		03	t	2023-12-02 17:35:45.615923	\N	2023	$7,000,000.00	\N
+2	7	\N	08:00	15:00		05	t	2023-11-19 01:57:31.360197	2023-11-19 17:02:37.49946	2023	$7,000,000.00	\N
+1	5	\N	09:00	17:00		03	f	2023-11-19 01:44:12.771322	2023-11-19 17:11:58.539025	2023	$7,000,000.00	\N
+3	7	\N	8:30	16:00		03	t	2023-12-01 02:36:27.450321	\N	2023	$7,000,000.00	\N
+5	10	\N	8:30	16:00		03	t	2023-12-02 18:36:42.63003	2023-12-02 18:47:44.360331	2023	$229.90	\N
+6	9	0001-01-01	09:00	16:00	\N	02	t	2023-12-04 03:06:47.374719	\N	2023	$150.00	\N
+7	9	2023-12-11	09:00	16:00	\N		t	2023-12-04 03:14:11.510908	\N	2023	$150.00	\N
+8	10	2023-12-11	09:00	16:00	\N		t	2023-12-04 04:17:34.132256	\N	2023	$150.00	\N
+9	9	2023-12-11	09:00	16:00	\N		t	2023-12-05 03:24:19.226125	\N	2023	$150.00	\N
+10	9	\N	09:00	16:00	\N	04	t	2023-12-05 05:59:42.118144	2023-12-05 23:12:55.992878	2023	$183.00	\N
+12	9	\N			\N	05	t	2023-12-06 04:00:04.303311	\N	2023	$180.00	\N
+13	9	\N	08:00 - 12:00	14:00 - 17:00	\N	05	t	2023-12-06 04:06:52.17721	\N	2023	$180.00	\N
+15	12	\N	08:00 - 12:00	14:00 - 17:00	\N	05	t	2023-12-12 02:19:11.692472	\N	2023	$180.00	20
 \.
 
 
@@ -673,6 +697,9 @@ COPY public.medical_specialty (id, doctor_id, specialty_id) FROM stdin;
 9	9	1
 10	10	1
 12	12	1
+13	13	1
+14	14	1
+15	15	1
 \.
 
 
@@ -687,13 +714,15 @@ COPY public.patient (id, name, birthdate, cpf, sex, address, active, registratio
 17	Martinho Lutero Silva Sousa	2001-10-07 00:00:00	92386040453	M	Rua Josefá	t	\N	\N	\N
 18	Daniel Berg	2004-12-13 00:00:00	92386040453	M	Rua Josefá	t	\N	\N	\N
 19	Daniel Berg	2004-12-13 00:00:00	92386040453	M	Rua Josefá	t	\N	\N	\N
-42	teste17	2004-12-13 00:00:00	00100100102	M	Rua Carlos Augusto	f	2023-11-23 03:16:12.187588	\N	\N
 43	teste18	2004-12-13 00:00:00	00100100102	M	Rua Carlos Augusto	t	2023-11-23 04:18:19.802223	\N	\N
 44	teste19	2004-12-13 00:00:00	00100100102	M	Rua Carlos Augusto	t	2023-11-23 17:29:37.726401	\N	https://th.bing.com/th/id/OIP.p3KbIWXio_vIB09Tzt--lQHaIB?w=179&h=194&c=7&r=0&o=5&dpr=1.3&pid=1.7
 16	Martinho Lutero	1988-09-22 00:00:00	11642401202	M	Rua Fictícia da Silva	t	\N	\N	\N
 41	teste16Atualizado	2004-12-13 00:00:00	00100100102	M	Rua Carlos Augusto	t	2023-11-22 00:34:22.460799	2023-11-23 17:38:44.349219	https://th.bing.com/th/id/OIP.p3KbIWXio_vIB09Tzt--lQHaIB?w=179&h=194&c=7&r=0&o=5&dpr=1.3&pid=1.7
+45	teste20	2004-12-13 00:00:00	00100100102	M	Rua Carlos Augusto	t	2023-11-23 23:00:39.343977	\N	https://th.bing.com/th/id/OIP.p3KbIWXio_vIB09Tzt--lQHaIB?w=179&h=194&c=7&r=0&o=5&dpr=1.3&pid=1.7
+42	teste17	2004-12-13 00:00:00	00100100102	M	Rua Carlos Augusto	f	2023-11-23 03:16:12.187588	\N	\N
 21	Daniel Berg	2004-12-13 00:00:00	92386040453	M	Rua Josefá	f	\N	\N	\N
 4	TESTE5	1988-09-22 00:00:00	11642401202	M	Rua Fictícia da Silva	t	\N	2023-10-19 00:00:00	\N
+46	teste21Atualizado2	1996-08-26 00:00:00	00100100102	M	Rua Carlos Augusto	t	2023-12-05 04:19:19.367142	2023-12-06 00:33:57.700197	https://th.bing.com/th/id/OIP.p3KbIWXio_vIB09Tzt--lQHaIB?w=179&h=194&c=7&r=0&o=5&dpr=1.3&pid=1.7
 23	Samara Ferreira	1982-09-22 00:00:00	11642462533	F	Rua Fictícia da Silva	f	2023-10-19 19:17:07.125514	\N	\N
 22	TESTE7	1992-09-22 00:00:00	41892896263	M	Rua Fictícia da Silva	t	\N	2023-11-09 09:27:13.804921	\N
 24	TESTE8	1956-08-04 00:00:00	93790488943	M	Rua Deodoro dos Santos	f	2023-11-09 09:15:51.937125	2023-11-09 09:30:49.176966	\N
@@ -731,14 +760,17 @@ COPY public.patient_authentication_information (id, patient_id, patient_email, p
 23	43	teste18gmail.com	\\x0c219e7b4330e603b5d5c385416ca86ce3a64a95a2c446a839fc466ea22e0738	\\xf78f7b6ebc9687cb3859c96704ada6a7dab4311592bd86034e56739624600961
 24	44	teste19gmail.com	\\x2f4173f3c473becda291272a5063af79f9401986f9bb8e308a6c19a9315e1f5f	\\xb075b116bc25f39c0ca22e351ee499aff8ffbf8b95e9105f8a62f1b813a2e721
 21	41	teste16Atualizado@gmail.com	\\x844d24da4144a2531aa85de143dc7a8da6fc48e2e2721075254bd354c8008949	\\xd93277b77e1ddc8d0063fbad049f5ff1c4862fa54c8409d1f27e193511b1c37a
+25	45	teste20gmail.com	\\x39e37e57ad207e8efd825681eb03dd3957a1a9fb406d97ffcf3cc38ddea82dc2	\\x8c765098120f6f7ee932c41bcbc1e288db78272242b05ba403878c47a4a1b0bc
+26	46	teste21Atualizado2@gmail.com	\\xfc50ed517a39cc9c2c6170f5ce9b922ab2ad6642d13e130dcf880ecf3068fec5	\\x1a90c0592c3e31c837a1509f52b1c0ad122f190c311e94f2566a5a29eeeaa547
 \.
 
 
 --
--- Data for Name: patient_doctor_schedule; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: patient_doctor_consultation; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.patient_doctor_schedule (id, patient_id, doctor_id, appointed_date, appointed_time, status, medical_schedule_id) FROM stdin;
+COPY public.patient_doctor_consultation (id, patient_id, doctor_id, appointment_date, appointment_time, status, value) FROM stdin;
+1	46	15	2023-12-20	08:00 - 12:00	t	$100.00
 \.
 
 
@@ -786,14 +818,14 @@ COPY public.test (id, name, email, birth_date) FROM stdin;
 -- Name: cellphone_doctor_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.cellphone_doctor_id_seq', 12, true);
+SELECT pg_catalog.setval('public.cellphone_doctor_id_seq', 21, true);
 
 
 --
 -- Name: cellphone_patient_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.cellphone_patient_id_seq', 32, true);
+SELECT pg_catalog.setval('public.cellphone_patient_id_seq', 34, true);
 
 
 --
@@ -807,49 +839,49 @@ SELECT pg_catalog.setval('public.cellphone_test_id_seq', 7, true);
 -- Name: doctor_authentication_information_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.doctor_authentication_information_id_seq', 11, true);
+SELECT pg_catalog.setval('public.doctor_authentication_information_id_seq', 18, true);
 
 
 --
 -- Name: doctor_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.doctor_id_seq', 12, true);
+SELECT pg_catalog.setval('public.doctor_id_seq', 21, true);
 
 
 --
 -- Name: medical_schedule_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.medical_schedule_id_seq', 2, true);
+SELECT pg_catalog.setval('public.medical_schedule_id_seq', 15, true);
 
 
 --
 -- Name: medical_specialty_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.medical_specialty_id_seq', 12, true);
+SELECT pg_catalog.setval('public.medical_specialty_id_seq', 21, true);
 
 
 --
 -- Name: patient_authentication_information_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.patient_authentication_information_id_seq', 24, true);
+SELECT pg_catalog.setval('public.patient_authentication_information_id_seq', 26, true);
 
 
 --
 -- Name: patient_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.patient_id_seq', 44, true);
+SELECT pg_catalog.setval('public.patient_id_seq', 46, true);
 
 
 --
 -- Name: patient_medico_schedule_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.patient_medico_schedule_id_seq', 1, false);
+SELECT pg_catalog.setval('public.patient_medico_schedule_id_seq', 1, true);
 
 
 --
@@ -947,10 +979,10 @@ ALTER TABLE ONLY public.patient_authentication_information
 
 
 --
--- Name: patient_doctor_schedule patient_medico_schedule_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: patient_doctor_consultation patient_medico_schedule_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.patient_doctor_schedule
+ALTER TABLE ONLY public.patient_doctor_consultation
     ADD CONSTRAINT patient_medico_schedule_pkey PRIMARY KEY (id);
 
 
@@ -995,10 +1027,10 @@ ALTER TABLE ONLY public.medical_schedule
 
 
 --
--- Name: patient_doctor_schedule doctor_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: patient_doctor_consultation doctor_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.patient_doctor_schedule
+ALTER TABLE ONLY public.patient_doctor_consultation
     ADD CONSTRAINT doctor_id_fk FOREIGN KEY (doctor_id) REFERENCES public.doctor(id);
 
 
@@ -1027,18 +1059,10 @@ ALTER TABLE ONLY public.cellphone_test
 
 
 --
--- Name: patient_doctor_schedule medical_schedule_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: patient_doctor_consultation patient_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.patient_doctor_schedule
-    ADD CONSTRAINT medical_schedule_id_fk FOREIGN KEY (medical_schedule_id) REFERENCES public.medical_schedule(id);
-
-
---
--- Name: patient_doctor_schedule patient_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.patient_doctor_schedule
+ALTER TABLE ONLY public.patient_doctor_consultation
     ADD CONSTRAINT patient_id_fk FOREIGN KEY (patient_id) REFERENCES public.patient(id);
 
 

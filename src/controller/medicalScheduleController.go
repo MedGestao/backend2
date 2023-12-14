@@ -7,23 +7,25 @@ import (
 	"MedGestao/src/response"
 )
 
-func RegisterMedicalSchedule(medicalScheduleRequest request.MedicalScheduleRequest) (bool, error, response.ErrorResponse) {
+func RegisterMedicalSchedule(medicalScheduleRequest []request.MedicalScheduleRequest) (bool, error, response.ErrorResponse) {
 	var success bool
 	var err error
 	var errorMessage response.ErrorResponse
 
-	if medicalScheduleRequest == (request.MedicalScheduleRequest{}) {
+	if len(medicalScheduleRequest) == 0 {
 		println("Nenhum dado recebido")
 		return success, err, errorMessage
 	}
 
-	medicalSchedule := model.NewMedicalSchedule(medicalScheduleRequest.DoctorId.Id, medicalScheduleRequest.QueryValue,
-		medicalScheduleRequest.DayOfService, medicalScheduleRequest.SpecificDate, medicalScheduleRequest.Period1,
-		medicalScheduleRequest.Period2, medicalScheduleRequest.Year, medicalScheduleRequest.ScheduleLimit)
+	for _, value := range medicalScheduleRequest {
+		medicalSchedule := model.NewMedicalSchedule(value.DoctorId.Id, value.QueryValue,
+			value.DayOfService, value.SpecificDate, value.Period1,
+			value.Period2, value.Year, value.ScheduleLimit)
 
-	success, err, errorMessage = dao.MedicalScheduleInsert(medicalSchedule)
-	if err != nil {
-		return success, err, errorMessage
+		success, err, errorMessage = dao.MedicalScheduleInsert(medicalSchedule)
+		if err != nil {
+			return success, err, errorMessage
+		}
 	}
 
 	return success, err, errorMessage

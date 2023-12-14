@@ -23,6 +23,11 @@ Thumbs.db
 
 # Ignorar arquivos de ambiente
 postgres-data
+# Ignore all files in the 'tmp' folder
+tmp/*
+
+# Except for the .gitkeep file
+!tmp/.gitkeep
 
 # Ignorar arquivos de configuração específicos do usuário
 .bash_history
