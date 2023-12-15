@@ -104,28 +104,7 @@ func GetDoctorById(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(doctor)
 	w.WriteHeader(http.StatusOK)
-	/* var doctor response.DoctorResponse
 
-	cellphoneUserResponse := response.CellphoneResponse{
-		Number: "1223",
-	}
-	userResponse := response.UserResponse{
-		Name:          "Test",
-		ImageUrl:      "http://192.168.0.164:3001/public/upload-3517911352.png",
-		CellphoneUser: cellphoneUserResponse,
-	}
-
-	specialtyUserResponse := response.SpecialtyResponse{Description: "sdhjfghjad"}
-	doctor = response.DoctorResponse{
-		User:      userResponse,
-		Crm:       "122",
-		Specialty: specialtyUserResponse,
-	}
-
-	// Retorna os dados do paciente no formato JSON
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(doctor)
-	w.WriteHeader(http.StatusOK) */
 }
 
 func EditDoctor(w http.ResponseWriter, r *http.Request) {

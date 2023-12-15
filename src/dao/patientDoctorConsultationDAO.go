@@ -231,7 +231,7 @@ func PatientDoctorConsultationById(patientDoctorConsultationId int) (response.Pa
 	sql := "select pdc.id, pdc.patient_id, pdc.doctor_id, pdc.appointment_date, pdc.appointment_time, pdc.value from patient_doctor_consultation pdc " +
 		"inner join patient p on pdc.patient_id = p.id " +
 		"inner join doctor d on pdc.doctor_id = d.id " +
-		"where pdc.id = $1 and d.active is true and pdc.status != 'C' true and p.active is true"
+		"where pdc.id = $1 and d.active is true and pdc.status != 'C' and p.active is true"
 
 	_, err = db.Prepare(sql)
 	if err != nil {

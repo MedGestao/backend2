@@ -51,7 +51,7 @@ func MedicalScheduleInsert(medicalSchedule model.MedicalSchedule) (bool, error, 
 
 	if medicalSchedule.GetSpecificDate().IsZero() {
 		sql = "insert into medical_schedule(doctor_id, day_of_service, period_1, period_2, active, " +
-			"registration_date, query_value, schedule_limit) values($1, $2, $3, $4, true, current_timestamp, $5, $6)"
+			"registration_date, query_value, schedule_limit, year) values($1, $2, $3, $4, true, current_timestamp, $5, $6, $7)"
 		if err != err {
 			return success, err, errorMessage
 		}
@@ -66,7 +66,8 @@ func MedicalScheduleInsert(medicalSchedule model.MedicalSchedule) (bool, error, 
 			medicalSchedule.GetPeriod1(),
 			medicalSchedule.GetPeriod2(),
 			medicalSchedule.GetQueryValue(),
-			medicalSchedule.GetScheduleLimit())
+			medicalSchedule.GetScheduleLimit(),
+			medicalSchedule.GetYear())
 		if err != nil {
 			return success, err, errorMessage
 		}

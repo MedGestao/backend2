@@ -33,7 +33,7 @@ func RegisterPatientDoctorConsultation(patientDoctorConsultationRequest request.
 func SearchPatientDoctorConsultationAllByDoctor(doctorId int, appointmentDate time.Time) ([]response.PatientDoctorConsultationByDoctorResponse, error) {
 	var patientDoctorConsultationByDoctorList []response.PatientDoctorConsultationByDoctorResponse
 	var err error
-	if doctorId == 0 || appointmentDate.IsZero() {
+	if doctorId == 0 {
 		return patientDoctorConsultationByDoctorList, err
 	}
 	patientDoctorConsultationByDoctorList, err = dao.PatientDoctorConsultationAllByIdDoctor(doctorId, appointmentDate)
