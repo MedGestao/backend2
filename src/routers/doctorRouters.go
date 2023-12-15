@@ -58,11 +58,12 @@ func CreateDoctor(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetDoctorsAll(w http.ResponseWriter, r *http.Request) {
-	var doctorFilterParameters request.DoctorFilterParameters
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&doctorFilterParameters); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+	doctorName := mux.Vars(r)["doctorName"]
+	specialtyName := mux.Vars(r)["specialtyName"]
+
+	doctorFilterParameters := request.DoctorFilterParameters{
+		DoctorName:    doctorName,
+		SpecialtyName: specialtyName,
 	}
 
 	doctors, err := controller.DoctorSelectRegisterAll(doctorFilterParameters.DoctorName, doctorFilterParameters.SpecialtyName)
@@ -104,28 +105,6 @@ func GetDoctorById(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(doctor)
 	w.WriteHeader(http.StatusOK)
 
-	//var doctor response.DoctorResponse
-	//
-	//cellphoneUserResponse := response.CellphoneResponse{
-	//	Number: "1223",
-	//}
-	//userResponse := response.UserResponse{
-	//	Name:          "Test",
-	//	ImageUrl:      "http://192.168.0.164:3001/public/upload-3517911352.png",
-	//	CellphoneUser: cellphoneUserResponse,
-	//}
-	//
-	//specialtyUserResponse := response.SpecialtyResponse{Description: "sdhjfghjad"}
-	//doctor = response.DoctorResponse{
-	//	User:      userResponse,
-	//	Crm:       "122",
-	//	Specialty: specialtyUserResponse,
-	//}
-	//
-	//// Retorna os dados do paciente no formato JSON
-	//w.Header().Set("Content-Type", "application/json")
-	//json.NewEncoder(w).Encode(doctor)
-	//w.WriteHeader(http.StatusOK)
 }
 
 func EditDoctor(w http.ResponseWriter, r *http.Request) {
@@ -191,6 +170,20 @@ func ValidateEmailDoctor(w http.ResponseWriter, r *http.Request) {
 	email := mux.Vars(r)["email"]
 
 	isValid := controller.ValidateEmailDoctor(email)
+
+	if isValid == true {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+	} else {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+	}
+}
+
+func ValidateCPFDoctor(w http.ResponseWriter, r *http.Request) {
+	cpf := mux.Vars(r)["cpf"]
+
+	isValid := controller.ValidateCPFDoctor(cpf)
 
 	if isValid == true {
 		w.Header().Set("Content-Type", "application/json")

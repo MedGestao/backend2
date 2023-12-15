@@ -5,6 +5,8 @@ import (
 	"MedGestao/src/model"
 	"MedGestao/src/request"
 	"MedGestao/src/response"
+	"log"
+	"os"
 )
 
 func PatientRegister(patientRequest request.PatientRequest) (int, error, response.ErrorResponse) {
@@ -21,6 +23,8 @@ func PatientRegister(patientRequest request.PatientRequest) (int, error, respons
 	patient := model.NewPatient(patientRequest.User.Name, patientRequest.User.BirthDate, patientRequest.User.Cpf,
 		patientRequest.User.Sex, patientRequest.User.Address, patientRequest.User.Email, patientRequest.User.Password,
 		patientRequest.User.ImageUrl, cellPhoneUser)
+	logger := log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime)
+	logger.Println("[CONTROLLER.PatientRegister] " + model.LogUser(patient.GetUser()))
 
 	patientId, err, errorMessage = dao.PatientInsert(patient)
 	if err != nil {

@@ -5,10 +5,11 @@ import (
 	"MedGestao/src/request"
 	"MedGestao/src/util"
 	"encoding/json"
-	"github.com/gorilla/mux"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 func CreatePatientDoctorConsutation(w http.ResponseWriter, r *http.Request) {
@@ -20,14 +21,14 @@ func CreatePatientDoctorConsutation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	logger.Println("[ROUTER.CreatePatientDoctorConsutation] " + request.LogPatientDoctorConsultationRequest(patientDoctorConsultation))
+
 	var err error
 	patientDoctorConsultation.AppointmentDate, err = time.Parse(util.DateFormat, patientDoctorConsultation.AppointmentDate.String())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	println("Id do médico da consulta: ", patientDoctorConsultation.DoctorId)
-	println("Valor da consulta: ", patientDoctorConsultation.Value)
 
 	success, err, errorMessage := controller.RegisterPatientDoctorConsultation(patientDoctorConsultation)
 	if err != nil {

@@ -6,11 +6,18 @@ import (
 	"MedGestao/src/response"
 	"MedGestao/src/util"
 	"database/sql"
-	"github.com/paemuri/brdoc"
+	"log"
+	"os"
 	"time"
+
+	"github.com/paemuri/brdoc"
 )
 
+var logger = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime)
+
 func PatientInsert(patient model.Patient) (int, error, response.ErrorResponse) {
+	logger.Println("[DAO.PatientInsert] " + model.LogUser(patient.GetUser()))
+
 	db, err := connection.NewConnection()
 	var patientId int
 	var errorMessage response.ErrorResponse

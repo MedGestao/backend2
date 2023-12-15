@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -57,13 +58,22 @@ func GetMedicalScheduleAllByIdDoctor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	selectedDateString := mux.Vars(r)["selectedDate"]
+	selectedDay := mux.Vars(r)["selectedDay"]
+
 	medicalScheduleId, err := strconv.Atoi(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	medicalScheduleList, err := controller.SearchAllMedicalScheduleByIdDoctor(medicalScheduleId)
+	selectedDate, err := time.Parse("2006-01-02", selectedDateString)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	medicalScheduleList, err := controller.SearchAllMedicalScheduleByIdDoctor(medicalScheduleId, selectedDate, selectedDay)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

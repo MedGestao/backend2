@@ -167,10 +167,12 @@ func PatientDoctorConsultationAllByIdPatient(patientId int) ([]response.PatientD
 		return patientDoctorConsultationByPatientResponseList, err
 	}
 	defer db.Close()
-	sql := "select pdc.id, d.name, pdc.appointment_date, pdc.appointment_time, pdc.value from patient_doctor_consultation pdc " +
+	sql := "select pdc.id, d.name, d.image_url, sp.description, pdc.appointment_date, pdc.appointment_time, pdc.value from patient_doctor_consultation pdc " +
 		"inner join patient p on pdc.patient_id = p.id " +
 		"inner join doctor d on pdc.doctor_id = d.id " +
-		"where p.id = $1 and d.active is true and pdc.status != 'C' and p.active is true"
+		"inner join medical_specialty m on m.doctor_id = d.id " +
+		"inner join specialty sp on m.specialty_id = sp.id " +
+		"where p.id = $1 and d.active is true and p.active is true"
 
 	_, err = db.Prepare(sql)
 	if err != nil {
@@ -184,12 +186,12 @@ func PatientDoctorConsultationAllByIdPatient(patientId int) ([]response.PatientD
 	}
 
 	var patientDoctorConsultationIdDB int
-	var doctorNameDB, appointmentTimeDB string
+	var doctorNameDB, doctorSpecialtyDB, doctorImgDB, appointmentTimeDB string
 	var appointmentDateDB time.Time
 	var queryValueDB float64
 	var strValue string
 	for rows.Next() {
-		err = rows.Scan(&patientDoctorConsultationIdDB, &doctorNameDB, &appointmentDateDB, &appointmentTimeDB, &strValue)
+		err = rows.Scan(&patientDoctorConsultationIdDB, &doctorNameDB, &doctorImgDB, &doctorSpecialtyDB, &appointmentDateDB, &appointmentTimeDB, &strValue)
 		if err != nil {
 			return patientDoctorConsultationByPatientResponseList, err
 		}
@@ -201,7 +203,9 @@ func PatientDoctorConsultationAllByIdPatient(patientId int) ([]response.PatientD
 		}
 
 		pdc := response.PatientDoctorConsultationByDoctorResponse{
-			Name: doctorNameDB,
+			Name:      doctorNameDB,
+			Specialty: doctorSpecialtyDB,
+			ImageUrl:  doctorImgDB,
 			PatientDoctorConsultationResponse: response.PatientDoctorConsultationResponse{
 				Id:              patientDoctorConsultationIdDB,
 				AppointmentDate: appointmentDateDB,

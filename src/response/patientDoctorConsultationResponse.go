@@ -14,7 +14,9 @@ type PatientDoctorConsultationResponse struct {
 
 type PatientDoctorConsultationByDoctorResponse struct {
 	Name                              string                            `json:"name"`
+	Specialty                         string                            `json:"specialty"`
 	BirthDate                         time.Time                         `json:"birthDate"`
 	Age                               string                            `json:"age"`
+	ImageUrl                          string                            `json:"imageUrl"`
 	PatientDoctorConsultationResponse PatientDoctorConsultationResponse `json:"patientDoctorConsultationResponse"`
 }

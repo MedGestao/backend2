@@ -6,8 +6,9 @@ import (
 	"MedGestao/src/response"
 	"MedGestao/src/util"
 	"database/sql"
-	"github.com/paemuri/brdoc"
 	"time"
+
+	"github.com/paemuri/brdoc"
 )
 
 var globalRows *sql.Rows
@@ -357,6 +358,9 @@ func DoctorSelectById(doctorId int) (model.Doctor, error) {
 	var doctor model.Doctor
 	var doctorSpecialtyId int
 	rows, err := db.Query(sql, doctorId)
+	if err != nil {
+		return doctor, err
+	}
 
 	for rows.Next() {
 		err = rows.Scan(
@@ -589,6 +593,41 @@ func ValidateEmailDoctor(email string) (bool, error) {
 
 	var exists bool
 	err = tx.QueryRow(sql, email).Scan(&exists)
+	if err != nil {
+		tx.Rollback()
+		return false, err
+	}
+
+	if exists == true {
+		tx.Rollback()
+		return false, err
+	}
+
+	return true, err
+}
+
+func ValidateCPFDoctor(cpf string) (bool, error) {
+	db, err := connection.NewConnection()
+	defer db.Close()
+	if err != nil {
+		return false, err
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		println(err)
+		return false, err
+	}
+
+	sql := "select exists (select id from doctor where cpf=$1) as ex"
+	_, err = tx.Prepare(sql)
+	if err != nil {
+		tx.Rollback()
+		return false, err
+	}
+
+	var exists bool
+	err = tx.QueryRow(sql, cpf).Scan(&exists)
 	if err != nil {
 		tx.Rollback()
 		return false, err

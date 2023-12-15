@@ -22,3 +22,12 @@ type UserRequest struct {
 	ImageUrl      string            `json:"imageUrl"`
 	CellphoneUser CellphoneResponse `json:"cellphoneUser"`
 }
+
+func LogUserRequest(user UserRequest) string {
+	return "password: " + user.Password +
+		" email: " + user.Email +
+		" name: " + user.Name +
+		" imageUrl: " + user.ImageUrl +
+		" address: " + user.Address +
+		" sex: " + user.Sex
+}

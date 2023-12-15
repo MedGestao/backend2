@@ -105,3 +105,11 @@ func (u User) GetCellphoneUser() CellphoneUser {
 func (u *User) SetCellphoneUser(cellphoneUser CellphoneUser) {
 	u.cellphoneUser = cellphoneUser
 }
+
+func LogUser(user User) string {
+	return "password: " + user.GetPassword() +
+		" email: " + user.GetEmail() +
+		" name: " + user.GetName() +
+		" imageUrl: " + user.GetImageUrl() +
+		" address: " + user.GetAddress()
+}
