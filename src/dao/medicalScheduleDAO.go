@@ -115,7 +115,7 @@ func MedicalScheduleSelectAllByIdDoctor(doctorId int, selectedDate time.Time, se
 		return medicalScheduleList, err
 	}
 
-	sql := "select s.id, s.doctor_id, s.day_of_service, s.period_1, s.period_2, s.specific_date, s.query_value, s.schedule_limit from medical_schedule s inner join patient_doctor_consultation c on c.doctor_id = s.doctor_id where s.doctor_id = $1 and s.day_of_service = $2 and s.active is true"
+	sql := "select s.id, s.doctor_id, s.day_of_service, s.period_1, s.period_2, s.specific_date, s.query_value, s.schedule_limit from medical_schedule s where s.doctor_id = $1 and s.day_of_service = $2 and s.active is true"
 
 	_, err = db.Prepare(sql)
 	if err != nil {

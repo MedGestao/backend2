@@ -49,6 +49,8 @@ func OpenServerTest() {
 
 	router.HandleFunc("/api/validate-email", routers.ValidateEmailDoctor).Queries("email", "{email}").Methods(http.MethodGet)
 
+	router.HandleFunc("/api/validate-cpf", routers.ValidateCPFDoctor).Queries("cpf", "{cpf}").Methods(http.MethodGet)
+
 	router.HandleFunc("/api/doctors/deactivate", routers.DeactivateDoctor).Methods(http.MethodPost)
 
 	router.HandleFunc("/api/specialties", routers.GetSpecialty).Methods(http.MethodGet)
@@ -69,7 +71,7 @@ func OpenServerTest() {
 	// PATIENT DOCTOR CONSULTATION ROUTERS
 	router.HandleFunc("/api/patientDoctorConsultation", routers.CreatePatientDoctorConsutation).Methods(http.MethodPost)
 
-	router.HandleFunc("/api/patientDoctorConsultation/searchByDoctor/{id}", routers.GetPatientDoctorConsultationAllByIdDoctor).Methods(http.MethodGet)
+	router.HandleFunc("/api/patientDoctorConsultation/searchByDoctor/{id}", routers.GetPatientDoctorConsultationAllByIdDoctor).Methods(http.MethodPut)
 
 	router.HandleFunc("/api/patientDoctorConsultation/searchByPatient/{id}", routers.GetPatientDoctorConsultationAllByIdPatient).Methods(http.MethodGet)
 

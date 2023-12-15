@@ -201,6 +201,20 @@ func ValidateEmailDoctor(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func ValidateCPFDoctor(w http.ResponseWriter, r *http.Request) {
+	cpf := mux.Vars(r)["cpf"]
+
+	isValid := controller.ValidateCPFDoctor(cpf)
+
+	if isValid == true {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+	} else {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+	}
+}
+
 func DeactivateDoctor(w http.ResponseWriter, r *http.Request) {
 	// Decodifica os dados JSON do corpo da solicitação
 	var idRequest request.DoctorIdRequest

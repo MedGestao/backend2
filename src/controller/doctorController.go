@@ -159,3 +159,9 @@ func ValidateEmailDoctor(email string) bool {
 
 	return isValid
 }
+
+func ValidateCPFDoctor(cpf string) bool {
+	isValid, _ := dao.ValidateCPFDoctor(cpf)
+
+	return isValid
+}
