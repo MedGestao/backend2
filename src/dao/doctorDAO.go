@@ -6,6 +6,7 @@ import (
 	"MedGestao/src/response"
 	"MedGestao/src/util"
 	"database/sql"
+	"strings"
 	"time"
 
 	"github.com/paemuri/brdoc"
@@ -218,6 +219,7 @@ func DoctorValidateLogin(emailLogin string, passwordLogin string) (bool, int, er
 }
 
 func DoctorSelectAll(doctorName string, specialtyDescription string) ([]response.DoctorResponse, error) {
+
 	db, err := connection.NewConnection()
 	var doctors []response.DoctorResponse
 
@@ -241,7 +243,7 @@ func DoctorSelectAll(doctorName string, specialtyDescription string) ([]response
 		sql = "select distinct on (d.cpf) d.id, d.name, d.image_url, s.id, s.description as specialty from doctor d " +
 			"left join medical_specialty ms on d.id = ms.doctor_id " +
 			"left join specialty s on ms.specialty_id = s.id where d.active is true and d.image_url is not null" +
-			" and d.name like '%' || $1 || '%'"
+			" and LOWER(d.name) like '%' || $1 || '%'"
 	}
 	if specialtyDescription != "" {
 		sql = "select distinct on (d.cpf) d.id, d.name, d.image_url, s.id, s.description as specialty from doctor d " +
@@ -279,20 +281,20 @@ func DoctorSelectAll(doctorName string, specialtyDescription string) ([]response
 		}
 	} else if doctorName != "" {
 		globalRows, err = db.Query(sql,
-			doctorName)
+			strings.ToLower(doctorName))
 		if err != nil {
 			return doctors, err
 		}
 	} else if specialtyDescription != "" {
 		globalRows, err = db.Query(sql,
-			specialtyDescription)
+			strings.ToLower(specialtyDescription))
 		if err != nil {
 			return doctors, err
 		}
 	} else {
 		globalRows, err = db.Query(sql,
-			doctorName,
-			specialtyDescription)
+			strings.ToLower(doctorName),
+			strings.ToLower(specialtyDescription))
 		if err != nil {
 			return doctors, err
 		}
@@ -320,6 +322,7 @@ func DoctorSelectAll(doctorName string, specialtyDescription string) ([]response
 				Description: doctorSpecialtyDB,
 			},
 		}
+		logger.Println("[DAO.DoctorSelectAll] doctorName: " + doctorName + " - " + response.LogUserResponse(doctor.User))
 
 		doctors = append(doctors, doctor)
 	}
