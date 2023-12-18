@@ -18,3 +18,8 @@ type UserResponse struct {
 	ImageUrl      string            `json:"imageUrl"`
 	CellphoneUser CellphoneResponse `json:"cellphoneUser"`
 }
+
+func LogUserResponse(user UserResponse) string {
+	return " name: " + user.Name +
+		" imageUrl: " + user.ImageUrl
+}

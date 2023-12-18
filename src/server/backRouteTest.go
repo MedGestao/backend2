@@ -39,7 +39,7 @@ func OpenServerTest() {
 	//DOCTOR ROUTERS
 	router.HandleFunc("/api/doctors", routers.CreateDoctor).Methods(http.MethodPost)
 
-	router.HandleFunc("/api/doctors", routers.GetDoctorsAll).Methods(http.MethodGet)
+	router.HandleFunc("/api/doctors", routers.GetDoctorsAll).Queries("doctorName", "{doctorName}").Methods(http.MethodGet)
 
 	router.HandleFunc("/api/doctors/{id}", routers.GetDoctorById).Methods(http.MethodGet)
 
