@@ -231,6 +231,7 @@ func PatientSelectById(patientId int) (model.Patient, error) {
 	}
 	patient = model.NewPatient(patientNameDB, patientBirthdateDB, patientCpfDB, patientSexDB, patientAddressDB, patientEmailDB, "", patientImageUrlDB, model.NewCellphoneUser(patientNumberDB))
 	patient.SetUserActive(patientActiveDB)
+	patient.SetUserId(patientId)
 
 	return patient, nil
 
