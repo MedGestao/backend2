@@ -97,6 +97,7 @@ func PatientSelectByIdRegister(patientId int) (response.PatientResponse, error) 
 			Number: p.GetUser().GetCellphoneUser().GetNumber(),
 		}
 		userResponse := response.UserResponse{
+			Id:            p.GetUser().GetId(),
 			Name:          p.GetUser().GetName(),
 			BirthDate:     p.GetUser().GetBirthDate(),
 			Cpf:           p.GetUser().GetCpf(),
